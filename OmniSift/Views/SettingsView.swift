@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage("isPremium", store: UserDefaults(suiteName: appGroupID))
     private var isPremium = false
+    @Environment(AIProcessingService.self) private var aiService
 
     var body: some View {
         NavigationStack {
@@ -36,18 +37,30 @@ struct SettingsView: View {
                     HStack {
                         Label("Gemma 4 E2B", systemImage: "cpu")
                         Spacer()
-                        Text("On-Device")
+                        Text("On-Device · ANE")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
 
                     HStack {
-                        Label("Model Status", systemImage: "arrow.down.circle")
+                        Label("Status", systemImage: modelStatusIcon)
                         Spacer()
-                        // TODO: Check model download status
-                        Text("Ready")
+                        modelStatusView
+                    }
+
+                    if !aiService.isModelLoaded {
+                        Button {
+                            Task { await aiService.loadModel() }
+                        } label: {
+                            Label("Download Model (~1.5 GB)", systemImage: "arrow.down.circle")
+                        }
+                        .disabled(aiService.isModelDownloading)
+                    }
+
+                    if let error = aiService.errorMessage {
+                        Text(error)
                             .font(.caption)
-                            .foregroundStyle(.green)
+                            .foregroundStyle(.red)
                     }
                 }
 
@@ -57,6 +70,9 @@ struct SettingsView: View {
                         .foregroundStyle(.green)
 
                     Label("No internet required for AI", systemImage: "wifi.slash")
+                        .foregroundStyle(.secondary)
+
+                    Label("Zero backend, zero tracking", systemImage: "eye.slash")
                         .foregroundStyle(.secondary)
                 }
 
@@ -77,8 +93,43 @@ struct SettingsView: View {
             .navigationTitle("Settings")
         }
     }
+
+    // MARK: - Model Status Helpers
+
+    private var modelStatusIcon: String {
+        if aiService.isModelLoaded { return "checkmark.circle.fill" }
+        if aiService.isModelDownloading { return "arrow.down.circle" }
+        if aiService.isModelCached { return "internaldrive" }
+        return "arrow.down.to.line"
+    }
+
+    @ViewBuilder
+    private var modelStatusView: some View {
+        if aiService.isModelLoaded {
+            Text("Ready")
+                .font(.caption)
+                .foregroundStyle(.green)
+        } else if aiService.isModelDownloading {
+            HStack(spacing: 6) {
+                ProgressView()
+                    .scaleEffect(0.7)
+                Text("Downloading...")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
+        } else if aiService.isModelCached {
+            Text("Cached (tap to load)")
+                .font(.caption)
+                .foregroundStyle(.orange)
+        } else {
+            Text("Not Downloaded")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
 }
 
 #Preview {
     SettingsView()
+        .environment(AIProcessingService())
 }

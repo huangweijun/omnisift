@@ -17,10 +17,13 @@ struct OmniSiftApp: App {
                 .environment(aiService)
                 .onAppear {
                     aiService.configure(modelContext: modelContainer.mainContext)
-                    Task { await aiService.loadModel() }
+                    // Auto-load model if already cached (no download needed)
+                    if aiService.isModelCached {
+                        Task { await aiService.loadModel() }
+                    }
                 }
                 .onChange(of: scenePhase) { _, newPhase in
-                    if newPhase == .active {
+                    if newPhase == .active, aiService.isModelLoaded {
                         Task { await aiService.processAllPending() }
                     }
                 }
