@@ -3,6 +3,7 @@ import SwiftData
 
 struct CardListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(AIProcessingService.self) private var aiService
     @Query(sort: \InsightCard.createdAt, order: .reverse) private var cards: [InsightCard]
 
     var body: some View {
@@ -26,6 +27,19 @@ struct CardListView: View {
                 }
             }
             .navigationTitle("OmniSift")
+            .toolbar {
+                if aiService.isProcessing {
+                    ToolbarItem(placement: .status) {
+                        HStack(spacing: 6) {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                            Text("Processing...")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
             .navigationDestination(for: InsightCard.self) { card in
                 CardDetailView(card: card)
             }

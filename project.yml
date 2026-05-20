@@ -12,7 +12,13 @@ settings:
     SWIFT_VERSION: "6.0"
     TARGETED_DEVICE_FAMILY: "1"
 
-packages: {}
+packages:
+  CoreMLLLM:
+    url: https://github.com/john-rocky/CoreML-LLM
+    from: "0.5.0"
+  RevenueCat:
+    url: https://github.com/RevenueCat/purchases-ios
+    from: "5.0.0"
 
 targets:
   OmniSift:
@@ -46,6 +52,11 @@ targets:
         com.apple.developer.kernel.increased-memory-limit: true
     dependencies:
       - target: ShareExtension
+      - package: CoreMLLLM
+      - package: RevenueCat
+        product: RevenueCat
+      - package: RevenueCat
+        product: RevenueCatUI
 
   ShareExtension:
     type: app-extension
