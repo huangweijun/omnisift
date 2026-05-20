@@ -5,13 +5,12 @@ import CoreMLLLM
 #endif
 
 /// Service responsible for processing pending InsightCards using the local Gemma 4 model.
-/// Runs in the main app only (not in Share Extension due to memory constraints).
+/// The model is bundled directly in the app — no download needed, works offline immediately.
 @MainActor
 @Observable
 class AIProcessingService {
     var isModelLoaded = false
-    var isModelDownloading = false
-    var downloadProgress: Double = 0
+    var isLoadingModel = false
     var isProcessing = false
     var processingProgress: Double = 0
     var currentCardID: UUID?
@@ -22,9 +21,6 @@ class AIProcessingService {
     #endif
 
     private var modelContext: ModelContext?
-
-    /// HuggingFace repo for the CoreML-converted Gemma 4 E2B model
-    private static let modelRepo = "mlboydaisuke/gemma-4-E2B-coreml"
 
     /// Maximum input characters to send to the model (prevents OOM on very long texts)
     private static let maxInputChars = 2000
@@ -48,34 +44,40 @@ class AIProcessingService {
 
     // MARK: - Model Lifecycle
 
-    /// Load the Gemma 4 model. Downloads on first call (~1.5GB), then cached.
+    /// Load the Gemma 4 model from the app bundle (no download needed).
     func loadModel() async {
-        guard !isModelLoaded else { return }
+        guard !isModelLoaded, !isLoadingModel else { return }
         errorMessage = nil
+        isLoadingModel = true
 
         #if canImport(CoreMLLLM)
-        guard llm == nil else { return }
         do {
-            isModelDownloading = true
-            llm = try await CoreMLLLM.load(repo: Self.modelRepo)
-            isModelDownloading = false
+            // Load from the bundled model directory inside the app
+            guard let modelURL = Bundle.main.url(forResource: "gemma4e2b", withExtension: nil, subdirectory: "Models") else {
+                // Fallback: check if models are in the top-level bundle
+                guard let altURL = Bundle.main.resourceURL?.appendingPathComponent("Models/gemma4e2b") else {
+                    errorMessage = "Model files not found in app bundle"
+                    isLoadingModel = false
+                    return
+                }
+                llm = try await CoreMLLLM.load(from: altURL)
+                isLoadingModel = false
+                isModelLoaded = true
+                return
+            }
+            llm = try await CoreMLLLM.load(from: modelURL)
+            isLoadingModel = false
             isModelLoaded = true
         } catch {
-            isModelDownloading = false
-            errorMessage = "Failed to load model: \(error.localizedDescription)"
+            isLoadingModel = false
+            errorMessage = "Model load failed: \(error.localizedDescription)"
         }
         #else
-        // Fallback: mock mode when CoreMLLLM is not available (e.g. Simulator without package)
+        // Simulator fallback: mock mode
+        try? await Task.sleep(for: .milliseconds(500))
+        isLoadingModel = false
         isModelLoaded = true
         #endif
-    }
-
-    /// Check if the model files already exist on disk (no download needed)
-    var isModelCached: Bool {
-        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        guard let modelsDir = documentsURL?.appendingPathComponent("Models") else { return false }
-        let contents = (try? FileManager.default.contentsOfDirectory(atPath: modelsDir.path)) ?? []
-        return !contents.isEmpty
     }
 
     // MARK: - Batch Processing
@@ -115,12 +117,9 @@ class AIProcessingService {
 
     // MARK: - Single Card Processing
 
-    /// Process a single card using the local Gemma 4 model
     private func processCard(_ card: InsightCard) async {
         do {
-            // Truncate input to prevent OOM
             let inputText = String(card.rawText.prefix(Self.maxInputChars))
-
             let fullResponse: String
 
             #if canImport(CoreMLLLM)
@@ -133,7 +132,6 @@ class AIProcessingService {
             fullResponse = mockGenerate(inputText: inputText)
             #endif
 
-            // Parse JSON response
             let result = parseAIResponse(fullResponse)
 
             card.title = result.title
@@ -155,7 +153,6 @@ class AIProcessingService {
     // MARK: - LLM Inference
 
     #if canImport(CoreMLLLM)
-    /// Generate response using CoreMLLLM
     private func generateWithLLM(_ llm: CoreMLLLM, inputText: String) async throws -> String {
         let messages: [CoreMLLLM.Message] = [
             .init(role: .user, content: """
@@ -176,7 +173,7 @@ class AIProcessingService {
     }
     #endif
 
-    /// Mock generation for simulator/development without the model
+    /// Mock generation for simulator/development
     private func mockGenerate(inputText: String) -> String {
         let sentences = inputText.components(separatedBy: CharacterSet(charactersIn: ".!?\n"))
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -189,7 +186,6 @@ class AIProcessingService {
         let summary = String(inputText.prefix(500))
         let tags = detectTags(from: inputText)
 
-        // Return as JSON to exercise the same parsing path
         let tagsJSON = tags.map { "\"\($0)\"" }.joined(separator: ",")
         return """
         {"title":"\(escapeJSON(title))","highlight":"\(escapeJSON(highlight))","summary":"\(escapeJSON(summary))","tags":[\(tagsJSON)]}
@@ -207,7 +203,6 @@ class AIProcessingService {
 
     // MARK: - Response Parsing
 
-    /// Parse the JSON response from the model, with fallback extraction
     private func parseAIResponse(_ response: String) -> AIResult {
         let jsonString = extractJSON(from: response)
 
@@ -221,11 +216,9 @@ class AIProcessingService {
             )
         }
 
-        // Fallback: basic text extraction if JSON parsing fails
         return fallbackExtract(from: response)
     }
 
-    /// Extract JSON object from a potentially wrapped response
     private func extractJSON(from text: String) -> String {
         guard let start = text.firstIndex(of: "{"),
               let end = text.lastIndex(of: "}") else {
@@ -234,7 +227,6 @@ class AIProcessingService {
         return String(text[start...end])
     }
 
-    /// Fallback extraction when model doesn't return valid JSON
     private func fallbackExtract(from text: String) -> AIResult {
         let lines = text.components(separatedBy: .newlines)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -252,7 +244,6 @@ class AIProcessingService {
         )
     }
 
-    /// Keyword-based tag detection (fallback when model fails)
     private func detectTags(from text: String) -> [String] {
         let keywords: [(String, [String])] = [
             ("AI", ["ai", "machine learning", "model", "neural", "llm", "gpt", "claude", "gemini"]),

@@ -41,10 +41,12 @@ fastlane/test_output
 *.dSYM.zip
 *.dSYM
 
-# AI Models (large files, not tracked)
-Models/*.mlmodelc
-Models/*.bin
-Models/*.gguf
+# AI Models (large files, not tracked in git — download via Scripts/download-model.sh)
+Models/gemma4e2b/
+Models/**/*.mlmodelc
+Models/**/*.bin
+Models/**/*.npy
+Models/**/hf_model/
 
 # Secrets
 .env

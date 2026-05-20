@@ -15,12 +15,10 @@ struct OmniSiftApp: App {
         WindowGroup {
             ContentView()
                 .environment(aiService)
-                .onAppear {
+                .task {
                     aiService.configure(modelContext: modelContainer.mainContext)
-                    // Auto-load model if already cached (no download needed)
-                    if aiService.isModelCached {
-                        Task { await aiService.loadModel() }
-                    }
+                    await aiService.loadModel()
+                    await aiService.processAllPending()
                 }
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active, aiService.isModelLoaded {

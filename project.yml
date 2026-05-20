@@ -28,6 +28,10 @@ targets:
     sources:
       - path: OmniSift
       - path: Shared
+      - path: Models
+        type: folder
+        buildPhase: resources
+        optional: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.omnisift.app

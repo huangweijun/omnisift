@@ -43,22 +43,37 @@ struct SettingsView: View {
                     }
 
                     HStack {
-                        Label("Status", systemImage: modelStatusIcon)
+                        Label("Status", systemImage: aiService.isModelLoaded ? "checkmark.circle.fill" : "hourglass")
                         Spacer()
-                        modelStatusView
+                        if aiService.isModelLoaded {
+                            Text("Ready")
+                                .font(.caption)
+                                .foregroundStyle(.green)
+                        } else if aiService.isLoadingModel {
+                            HStack(spacing: 6) {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                                Text("Loading...")
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
+                            }
+                        } else {
+                            Text("Idle")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
-                    if !aiService.isModelLoaded {
-                        Button {
-                            Task { await aiService.loadModel() }
-                        } label: {
-                            Label("Download Model (~1.5 GB)", systemImage: "arrow.down.circle")
-                        }
-                        .disabled(aiService.isModelDownloading)
+                    HStack {
+                        Label("Speed", systemImage: "gauge.with.dots.needle.33percent")
+                        Spacer()
+                        Text("~31 tok/s")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
 
                     if let error = aiService.errorMessage {
-                        Text(error)
+                        Label(error, systemImage: "exclamationmark.triangle")
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
@@ -69,10 +84,13 @@ struct SettingsView: View {
                     Label("All data stays on your device", systemImage: "lock.shield.fill")
                         .foregroundStyle(.green)
 
-                    Label("No internet required for AI", systemImage: "wifi.slash")
+                    Label("No internet required", systemImage: "wifi.slash")
                         .foregroundStyle(.secondary)
 
                     Label("Zero backend, zero tracking", systemImage: "eye.slash")
+                        .foregroundStyle(.secondary)
+
+                    Label("Model bundled in app (~1.5 GB)", systemImage: "internaldrive")
                         .foregroundStyle(.secondary)
                 }
 
@@ -91,40 +109,6 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
-        }
-    }
-
-    // MARK: - Model Status Helpers
-
-    private var modelStatusIcon: String {
-        if aiService.isModelLoaded { return "checkmark.circle.fill" }
-        if aiService.isModelDownloading { return "arrow.down.circle" }
-        if aiService.isModelCached { return "internaldrive" }
-        return "arrow.down.to.line"
-    }
-
-    @ViewBuilder
-    private var modelStatusView: some View {
-        if aiService.isModelLoaded {
-            Text("Ready")
-                .font(.caption)
-                .foregroundStyle(.green)
-        } else if aiService.isModelDownloading {
-            HStack(spacing: 6) {
-                ProgressView()
-                    .scaleEffect(0.7)
-                Text("Downloading...")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-            }
-        } else if aiService.isModelCached {
-            Text("Cached (tap to load)")
-                .font(.caption)
-                .foregroundStyle(.orange)
-        } else {
-            Text("Not Downloaded")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 }
