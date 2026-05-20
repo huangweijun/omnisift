@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("isPremium", store: UserDefaults(suiteName: appGroupID))
-    private var isPremium = false
     @Environment(AIProcessingService.self) private var aiService
+    @Environment(SubscriptionService.self) private var subscriptionService
+    @State private var showPaywall = false
 
     var body: some View {
         NavigationStack {
@@ -13,9 +13,10 @@ struct SettingsView: View {
                     HStack {
                         Label("AI Processing", systemImage: "sparkles")
                         Spacer()
-                        if isPremium {
-                            Text("Unlimited")
-                                .foregroundStyle(Color.accentColor)
+                        if subscriptionService.isPremium {
+                            Label("Unlimited", systemImage: "crown.fill")
+                                .font(.caption)
+                                .foregroundStyle(.yellow)
                         } else {
                             Text("\(DailyUsageTracker.todayCount) / \(DailyUsageTracker.freeLimit)")
                                 .foregroundStyle(
@@ -24,9 +25,11 @@ struct SettingsView: View {
                         }
                     }
 
-                    if !isPremium {
-                        Button("Upgrade to Pro") {
-                            // TODO: Present RevenueCat paywall
+                    if !subscriptionService.isPremium {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            Label("Upgrade to Pro", systemImage: "crown")
                         }
                         .foregroundStyle(Color.accentColor)
                     }
@@ -89,9 +92,18 @@ struct SettingsView: View {
 
                     Label("Zero backend, zero tracking", systemImage: "eye.slash")
                         .foregroundStyle(.secondary)
+                }
 
-                    Label("Model bundled in app (~1.5 GB)", systemImage: "internaldrive")
-                        .foregroundStyle(.secondary)
+                // Account section
+                Section("Account") {
+                    if subscriptionService.isPremium {
+                        Label("Pro Active", systemImage: "checkmark.seal.fill")
+                            .foregroundStyle(.green)
+                    }
+
+                    Button("Restore Purchases") {
+                        Task { await subscriptionService.restorePurchases() }
+                    }
                 }
 
                 // About section
@@ -109,6 +121,9 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .sheet(isPresented: $showPaywall) {
+                ProPaywallView()
+            }
         }
     }
 }
@@ -116,4 +131,5 @@ struct SettingsView: View {
 #Preview {
     SettingsView()
         .environment(AIProcessingService())
+        .environment(SubscriptionService())
 }

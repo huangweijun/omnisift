@@ -82,7 +82,7 @@ class AIProcessingService {
 
     // MARK: - Batch Processing
 
-    /// Process all pending cards
+    /// Process all pending cards (respects free tier limit)
     func processAllPending() async {
         guard isModelLoaded, !isProcessing else { return }
         guard let modelContext else { return }
@@ -99,7 +99,14 @@ class AIProcessingService {
         guard let pendingCards = try? modelContext.fetch(descriptor),
               !pendingCards.isEmpty else { return }
 
+        let isPremium = UserDefaults(suiteName: appGroupID)?.bool(forKey: "isPremium") ?? false
+
         for (index, card) in pendingCards.enumerated() {
+            // Check free tier limit (skip if reached and not premium)
+            if !isPremium && DailyUsageTracker.isLimitReached {
+                break
+            }
+
             currentCardID = card.id
             processingProgress = Double(index) / Double(pendingCards.count)
 

@@ -5,6 +5,7 @@ import SwiftData
 struct OmniSiftApp: App {
     let modelContainer: ModelContainer
     @State private var aiService = AIProcessingService()
+    @State private var subscriptionService = SubscriptionService()
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -15,7 +16,13 @@ struct OmniSiftApp: App {
         WindowGroup {
             ContentView()
                 .environment(aiService)
+                .environment(subscriptionService)
                 .task {
+                    // Configure RevenueCat
+                    subscriptionService.configure()
+                    await subscriptionService.checkStatus()
+
+                    // Load AI model and process pending cards
                     aiService.configure(modelContext: modelContainer.mainContext)
                     await aiService.loadModel()
                     await aiService.processAllPending()
