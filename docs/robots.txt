@@ -19,4 +19,4 @@ Allow: /
 User-agent: Claude-User
 Allow: /
 
-Sitemap: https://omnisift.app/sitemap.xml
+Sitemap: https://huangweijun.github.io/omnisift/sitemap.xml
