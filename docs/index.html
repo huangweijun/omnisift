@@ -1,22 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OmniSift (知漏)</title>
-<style>
-body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 80px auto; padding: 0 1.5rem; text-align: center; color: #1d1d1f; }
-h1 { font-size: 2rem; margin-bottom: 0.25rem; }
-.subtitle { color: #6e6e73; margin-bottom: 2rem; }
-a { display: inline-block; margin: 0.5rem 1rem; color: #0066cc; text-decoration: none; font-size: 1.1rem; }
-a:hover { text-decoration: underline; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniSift - AI Cross-App Knowledge Capture</title>
+  <meta name="description" content="OmniSift is an iOS AI knowledge capture app that turns text, links, articles, and screenshots from any app into structured knowledge cards.">
+  <link rel="canonical" href="https://omnisift.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="OmniSift - AI Cross-App Knowledge Capture">
+  <meta property="og:description" content="Save snippets from any iOS app and turn them into AI-structured knowledge cards, summaries, tags, entities, and graph connections.">
+  <meta property="og:url" content="https://omnisift.app/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="OmniSift - AI Cross-App Knowledge Capture">
+  <meta name="twitter:description" content="An iOS Share Sheet workflow for turning scattered ideas into structured knowledge cards.">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "OmniSift",
+    "alternateName": "知漏",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "iOS",
+    "description": "OmniSift is an iOS AI knowledge capture app that lets users save text, links, articles, and screenshots from any app through the iOS Share Sheet, then turns them into structured knowledge cards with summaries, highlights, tags, entities, and knowledge graph connections.",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Free",
+        "price": "0",
+        "priceCurrency": "CNY",
+        "description": "5 AI processing uses per day."
+      },
+      {
+        "@type": "Offer",
+        "name": "OmniSift Pro",
+        "price": "12",
+        "priceCurrency": "CNY",
+        "description": "50 AI processing uses per day. Monthly plan is ¥12 and annual plan is ¥68."
+      }
+    ],
+    "publisher": {
+      "@type": "Organization",
+      "name": "OmniSift",
+      "url": "https://omnisift.app/"
+    }
+  }
+  </script>
 </head>
 <body>
-<h1>OmniSift (知漏)</h1>
-<p class="subtitle">AI Cross-App Snippet Capture / 跨应用 AI 知识碎片收集</p>
-<nav>
-<a href="privacy-policy.html">Privacy Policy / 隐私政策</a>
-</nav>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="index.html" aria-label="OmniSift home">
+        <span class="brand-mark">知</span>
+        <span>OmniSift / 知漏</span>
+      </a>
+      <div class="nav-links">
+        <a href="use-cases.html">Use cases</a>
+        <a href="compare.html">Compare</a>
+        <a href="faq.html">FAQ</a>
+        <a href="privacy-policy.html">Privacy</a>
+        <a class="nav-cta" href="mailto:omnisift.app@gmail.com">Launch notice</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-scene" aria-hidden="true">
+          <div class="scene-node">ChatGPT</div>
+          <div class="scene-node">Safari</div>
+          <div class="scene-node">WeChat</div>
+          <div class="scene-node">Notes</div>
+          <div class="scene-card primary">
+            <span class="scene-pill">AI knowledge card</span>
+            <div class="scene-title">Why this answer is worth saving</div>
+            <div class="scene-line"></div>
+            <div class="scene-line"></div>
+            <div class="scene-line short"></div>
+          </div>
+          <div class="scene-card secondary">
+            <span class="scene-pill">Entities + relations</span>
+            <div class="scene-title">Claude -> research notes -> next search</div>
+            <div class="scene-line"></div>
+            <div class="scene-line short"></div>
+          </div>
+        </div>
+        <div class="hero-copy">
+          <div class="eyebrow">iOS Share Sheet + AI knowledge cards</div>
+          <h1>OmniSift<br>知漏</h1>
+          <p class="hero-subtitle">Save text, links, articles, and screenshots from any app. OmniSift turns scattered snippets into structured knowledge cards with summaries, highlights, tags, entities, and connections.</p>
+          <p class="hero-zh">从任意 App 保存文本、链接、文章和截图。知漏会把零散内容整理成带有摘要、高亮、标签、实体和关联的知识卡片。</p>
+          <div class="cta-row">
+            <a class="button primary" href="mailto:omnisift.app@gmail.com?subject=OmniSift%20launch%20notice" data-app-store-link>Coming soon on the App Store / 即将在 App Store 上线</a>
+            <a class="button secondary" href="mailto:omnisift.app@gmail.com?subject=OmniSift%20launch%20notice">Get launch notice / 获取上线提醒</a>
+          </div>
+          <div class="proof-strip" aria-label="Product facts">
+            <span>No account required</span>
+            <span>Cards stored locally</span>
+            <span>No tracking or analytics</span>
+            <span>无需账号</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="workflow">
+      <div class="section-header">
+        <p class="section-kicker">How it works</p>
+        <h2>One iOS share action becomes a knowledge card.</h2>
+        <p class="lead">OmniSift is built for ideas that appear outside your notes app: AI answers, web paragraphs, chat messages, screenshots, and saved links.</p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <span class="num">1</span>
+          <h3>Share from any app</h3>
+          <p>Select text, share a link, save an article, or send a screenshot through the iOS Share Sheet.</p>
+          <p class="zh">在任意 App 中选中文字、分享链接、保存文章或发送截图到知漏。</p>
+        </article>
+        <article class="card blue">
+          <span class="num">2</span>
+          <h3>AI distills the snippet</h3>
+          <p>Cloud AI extracts a title, summary, highlights, tags, named entities, and semantic relations.</p>
+          <p class="zh">云端 AI 自动提炼标题、摘要、高亮、标签、实体和语义关系。</p>
+        </article>
+        <article class="card coral">
+          <span class="num">3</span>
+          <h3>Review and connect</h3>
+          <p>Browse your library, search saved cards, and revisit ideas through a growing personal knowledge graph.</p>
+          <p class="zh">回到知识库中浏览、搜索，并通过个人知识图谱重新发现关联。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="section">
+        <div class="grid two">
+          <div>
+            <p class="section-kicker">Positioning</p>
+            <h2>Not another place to type notes.</h2>
+            <p class="lead">OmniSift starts where ideas actually show up: inside ChatGPT, Claude, Safari, WeChat, X, Notes, and screenshots. It focuses on capture, structure, and recall.</p>
+          </div>
+          <div class="quote-panel">
+            <p><strong>OmniSift is an iOS AI knowledge capture app.</strong> It lets users save text, links, articles, and screenshots from any app through the iOS Share Sheet, then turns them into structured knowledge cards. Cards are stored locally on device. No account is required.</p>
+            <p class="zh"><strong>知漏是一款 iOS AI 知识捕获应用。</strong>用户可以通过系统分享菜单，从任意 App 保存文本、链接、文章和截图；知漏会将这些碎片整理成结构化知识卡片。卡片保存在设备本地，无需注册账号。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <p class="section-kicker">Privacy boundary</p>
+        <h2>Local-first storage, clear cloud processing.</h2>
+        <p class="lead">The product page should be precise: OmniSift does not claim fully local AI. Text you share is sent to cloud AI for processing, and the resulting cards are stored on your device.</p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <h3>No account required</h3>
+          <p>Start collecting without sign-in, onboarding accounts, or a hosted workspace.</p>
+        </article>
+        <article class="card">
+          <h3>No tracking</h3>
+          <p>OmniSift does not use analytics services, advertising frameworks, or behavioral tracking.</p>
+        </article>
+        <article class="card">
+          <h3>Local card storage</h3>
+          <p>Processed knowledge cards are stored locally on device. Text is sent to cloud AI only for processing.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="section">
+        <div class="section-header">
+          <p class="section-kicker">Pricing</p>
+          <h2>Free to start, Pro for heavier capture.</h2>
+          <p class="lead">The public pricing copy matches the App Store metadata for the first release.</p>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <h3>Free</h3>
+            <p>5 AI processing uses per day.</p>
+            <p class="zh">免费版：每日 5 次 AI 处理。</p>
+          </article>
+          <article class="card gold">
+            <h3>OmniSift Pro</h3>
+            <p>50 AI processing uses per day. ¥12/month or ¥68/year.</p>
+            <p class="zh">专业版：每日 50 次 AI 处理。¥12/月或 ¥68/年。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section compact">
+      <div class="cta-row">
+        <a class="button primary" href="mailto:omnisift.app@gmail.com?subject=OmniSift%20launch%20notice" data-app-store-link>Coming soon on the App Store / 即将在 App Store 上线</a>
+        <a class="button secondary" href="faq.html">Read the FAQ / 查看常见问题</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div>
+        <a class="brand" href="index.html"><span class="brand-mark">知</span><span>OmniSift / 知漏</span></a>
+        <p class="small">AI cross-app snippet capture for iOS. 跨应用 AI 知识碎片收集。</p>
+      </div>
+      <div class="footer-links">
+        <a href="use-cases.html">Use cases</a>
+        <a href="compare.html">Compare</a>
+        <a href="faq.html">FAQ</a>
+        <a href="changelog.html">Changelog</a>
+        <a href="privacy-policy.html">Privacy</a>
+        <a href="mailto:omnisift.app@gmail.com">Contact</a>
+      </div>
+    </div>
+  </footer>
+  <script src="site.js"></script>
 </body>
 </html>
