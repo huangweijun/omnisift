@@ -4,12 +4,12 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 
 ## Core pages
 
-- Product: https://huangweijun.github.io/omnisift/
-- Use cases: https://huangweijun.github.io/omnisift/use-cases.html
-- Comparison: https://huangweijun.github.io/omnisift/compare.html
-- FAQ: https://huangweijun.github.io/omnisift/faq.html
-- Changelog: https://huangweijun.github.io/omnisift/changelog.html
-- Privacy: https://huangweijun.github.io/omnisift/privacy-policy.html
+- Product: https://omnisift.app/
+- Use cases: https://omnisift.app/use-cases.html
+- Comparison: https://omnisift.app/compare.html
+- FAQ: https://omnisift.app/faq.html
+- Changelog: https://omnisift.app/changelog.html
+- Privacy: https://omnisift.app/privacy-policy.html
 - App Store: pending review, URL not public yet
 
 ## Key facts
