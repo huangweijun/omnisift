@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,13 +37,19 @@
 <body>
   <header class="site-header">
     <nav class="nav" aria-label="Main navigation">
-      <a class="brand" href="index.html"><span class="brand-mark">知</span><span>OmniSift / 知漏</span></a>
-      <div class="nav-links">
-        <a href="use-cases.html">Use cases</a>
-        <a href="compare.html">Compare</a>
-        <a href="faq.html">FAQ</a>
-        <a href="privacy-policy.html">Privacy</a>
-        <a class="nav-cta" href="mailto:omnisift.app@gmail.com">Launch notice</a>
+      <a class="brand" href="index.html"><span class="brand-mark" data-i18n="brand.mark">O</span><span data-i18n="brand.name">OmniSift</span></a>
+      <div class="nav-actions">
+        <div class="nav-links">
+          <a href="use-cases.html" data-i18n="nav.useCases">Use cases</a>
+          <a href="compare.html" data-i18n="nav.compare">Compare</a>
+          <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+          <a href="privacy-policy.html" data-i18n="nav.privacy">Privacy</a>
+          <a class="nav-cta" href="mailto:omnisift.app@gmail.com" data-i18n="nav.launch">Launch notice</a>
+        </div>
+        <div class="language-setting" aria-label="Language setting">
+          <button type="button" data-lang-option="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang-option="zh" aria-pressed="false">中文</button>
+        </div>
       </div>
     </nav>
   </header>
@@ -51,9 +57,9 @@
   <main>
     <section class="page-hero">
       <div class="page-hero-inner">
-        <p class="section-kicker">Changelog</p>
-        <h1>Launch notes for OmniSift.</h1>
-        <p>This page records public product updates so users, search engines, and AI answer engines can follow what changed over time.</p>
+        <p class="section-kicker" data-i18n="changelog.kicker">Changelog</p>
+        <h1 data-i18n="changelog.title">Launch notes for OmniSift.</h1>
+        <p data-i18n="changelog.lead">This page records public product updates so users, search engines, and AI answer engines can follow what changed over time.</p>
       </div>
     </section>
 
@@ -61,13 +67,13 @@
       <div class="timeline">
         <article class="timeline-item">
           <span class="date">2026-05-25</span>
-          <h2>v1.0 is in App Store Developer review</h2>
-          <p>OmniSift is preparing its first iOS release. The first version focuses on Share Extension capture, AI-powered knowledge card generation, local card storage, and a personal knowledge graph experience.</p>
+          <h2 data-i18n="changelog.v1.title">v1.0 is in App Store Developer review</h2>
+          <p data-i18n="changelog.v1.body">OmniSift is preparing its first iOS release. The first version focuses on Share Extension capture, AI-powered knowledge card generation, local card storage, and a personal knowledge graph experience.</p>
           <ul class="feature-list">
-            <li><span class="check">✓</span><span>Capture text, links, articles, and screenshots through the iOS Share Sheet.</span></li>
-            <li><span class="check">✓</span><span>Generate card titles, summaries, highlights, tags, entities, and semantic relations with cloud AI.</span></li>
-            <li><span class="check">✓</span><span>Browse saved cards, related insights, topic clusters, and knowledge graph views.</span></li>
-            <li><span class="check">✓</span><span>Free plan: 5 AI processing uses per day. Pro: 50 uses per day at ¥12/month or ¥68/year.</span></li>
+            <li><span class="check">✓</span><span data-i18n="changelog.v1.capture">Capture text, links, articles, and screenshots through the iOS Share Sheet.</span></li>
+            <li><span class="check">✓</span><span data-i18n="changelog.v1.ai">Generate card titles, summaries, highlights, tags, entities, and semantic relations with cloud AI.</span></li>
+            <li><span class="check">✓</span><span data-i18n="changelog.v1.graph">Browse saved cards, related insights, topic clusters, and knowledge graph views.</span></li>
+            <li><span class="check">✓</span><span data-i18n="changelog.v1.pricing">Free plan: 5 AI processing uses per day. Pro: 50 uses per day at ¥12/month or ¥68/year.</span></li>
           </ul>
         </article>
       </div>
@@ -77,18 +83,19 @@
   <footer class="site-footer">
     <div class="footer-inner">
       <div>
-        <a class="brand" href="index.html"><span class="brand-mark">知</span><span>OmniSift / 知漏</span></a>
-        <p class="small">AI cross-app snippet capture for iOS. 跨应用 AI 知识碎片收集。</p>
+        <a class="brand" href="index.html"><span class="brand-mark" data-i18n="brand.mark">O</span><span data-i18n="brand.name">OmniSift</span></a>
+        <p class="small" data-i18n="footer.tagline">AI cross-app snippet capture for iOS.</p>
       </div>
       <div class="footer-links">
-        <a href="index.html">Home</a>
-        <a href="use-cases.html">Use cases</a>
-        <a href="compare.html">Compare</a>
-        <a href="faq.html">FAQ</a>
-        <a href="privacy-policy.html">Privacy</a>
-        <a href="mailto:omnisift.app@gmail.com">Contact</a>
+        <a href="index.html" data-i18n="footer.home">Home</a>
+        <a href="use-cases.html" data-i18n="nav.useCases">Use cases</a>
+        <a href="compare.html" data-i18n="nav.compare">Compare</a>
+        <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+        <a href="privacy-policy.html" data-i18n="nav.privacy">Privacy</a>
+        <a href="mailto:omnisift.app@gmail.com" data-i18n="footer.contact">Contact</a>
       </div>
     </div>
   </footer>
+  <script src="site.js"></script>
 </body>
 </html>
