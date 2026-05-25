@@ -1,0 +1,45 @@
+name: Growth Pack
+
+on:
+  workflow_dispatch:
+    inputs:
+      week:
+        description: Optional ISO week such as 2026-W22
+        required: false
+        type: string
+  schedule:
+    - cron: "0 1 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Generate draft pack
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check GEO readiness
+        run: node Growth/scripts/check_geo_readiness.mjs
+
+      - name: Generate weekly drafts
+        run: node Growth/scripts/generate_growth_pack.mjs "${{ inputs.week }}"
+
+      - name: Create metrics template
+        run: node Growth/scripts/weekly_report.mjs "${{ inputs.week }}"
+
+      - name: Upload growth artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: omnisift-growth-pack
+          path: |
+            Growth/dist/**
+            Growth/metrics/*.md
