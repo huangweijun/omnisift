@@ -13,16 +13,26 @@ class SubscriptionService {
     var isLoading = false
 
     /// Entitlement identifier configured in RevenueCat dashboard
-    private static let entitlementID = "pro"
+    static let entitlementID = "pro"
 
-    /// RevenueCat API key
-    static let apiKey = "test_OGXBUulLoQSAMmt1xTfxmAFzWwK"
+    /// RevenueCat API key injected from Config/Local.xcconfig into Info.plist.
+    static let apiKey: String? = {
+        if let key = Bundle.main.configuredString(forInfoDictionaryKey: "REVENUECAT_API_KEY") {
+            return key
+        }
+        return Bundle.main.secretPlistString(forKey: "REVENUECAT_API_KEY")
+    }()
 
     /// Configure RevenueCat SDK — call once at app launch
     func configure() {
         #if canImport(RevenueCat)
+        guard let apiKey = Self.apiKey else {
+            isPremium = false
+            syncToAppGroup()
+            return
+        }
         Purchases.logLevel = .warn
-        Purchases.configure(withAPIKey: Self.apiKey)
+        Purchases.configure(withAPIKey: apiKey)
         // Listen for customer info changes
         Task { await listenForUpdates() }
         #endif
@@ -31,6 +41,11 @@ class SubscriptionService {
     /// Check current subscription status
     func checkStatus() async {
         #if canImport(RevenueCat)
+        guard Purchases.isConfigured else {
+            isPremium = false
+            syncToAppGroup()
+            return
+        }
         isLoading = true
         defer { isLoading = false }
         do {
@@ -46,6 +61,9 @@ class SubscriptionService {
     /// Restore purchases (for users who reinstall or switch devices)
     func restorePurchases() async -> Bool {
         #if canImport(RevenueCat)
+        guard Purchases.isConfigured else {
+            return false
+        }
         do {
             let customerInfo = try await Purchases.shared.restorePurchases()
             isPremium = customerInfo.entitlements[Self.entitlementID]?.isActive == true
@@ -63,6 +81,9 @@ class SubscriptionService {
 
     #if canImport(RevenueCat)
     private func listenForUpdates() async {
+        guard Purchases.isConfigured else {
+            return
+        }
         for await customerInfo in Purchases.shared.customerInfoStream {
             isPremium = customerInfo.entitlements[Self.entitlementID]?.isActive == true
             syncToAppGroup()
@@ -73,5 +94,29 @@ class SubscriptionService {
     /// Sync premium status to App Group UserDefaults so Share Extension can read it
     private func syncToAppGroup() {
         UserDefaults(suiteName: appGroupID)?.set(isPremium, forKey: "isPremium")
+    }
+}
+
+extension Bundle {
+    func configuredString(forInfoDictionaryKey key: String) -> String? {
+        guard let value = object(forInfoDictionaryKey: key) as? String else {
+            return nil
+        }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed != "$(\(key))" else {
+            return nil
+        }
+        return trimmed
+    }
+
+    func secretPlistString(forKey key: String) -> String? {
+        guard let url = url(forResource: "Secrets", withExtension: "plist"),
+              let data = try? Data(contentsOf: url),
+              let dict = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+              let value = dict[key] as? String else {
+            return nil
+        }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }

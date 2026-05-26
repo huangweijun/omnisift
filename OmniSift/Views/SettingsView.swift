@@ -1,26 +1,51 @@
 import SwiftUI
 
 struct SettingsView: View {
+    private static let unlimitedModeTapThreshold = 10
+
     @Environment(AIProcessingService.self) private var aiService
     @Environment(SubscriptionService.self) private var subscriptionService
+    @AppStorage(UserDefaultsKeys.outputLanguagePreference, store: UserDefaults(suiteName: appGroupID))
+    private var outputLanguageRawValue = OutputLanguagePreference.automatic.rawValue
     @State private var showPaywall = false
+    @State private var versionTapCount = 0
+    @State private var unlimitedEnabled = DailyUsageTracker.unlimitedMode
+
+    private var canToggleUnlimitedMode: Bool {
+        DailyUsageTracker.allowsTestingBypass
+    }
+
+    private var strings: AppStrings {
+        AppStrings(rawPreferenceValue: outputLanguageRawValue)
+    }
+
+    private var dailyLimitReached: Bool {
+        DailyUsageTracker.isLimitReached(isPremium: subscriptionService.isPremium)
+    }
+
+    private var outputLanguageBinding: Binding<OutputLanguagePreference> {
+        Binding {
+            OutputLanguagePreference(rawValue: outputLanguageRawValue) ?? .automatic
+        } set: { newValue in
+            outputLanguageRawValue = newValue.rawValue
+        }
+    }
 
     var body: some View {
         NavigationStack {
             List {
                 // Usage section
-                Section("Today's Usage") {
+                Section(strings.todayUsage) {
                     HStack {
-                        Label("AI Processing", systemImage: "sparkles")
+                        Label(strings.aiProcessing, systemImage: "sparkles")
                         Spacer()
                         if subscriptionService.isPremium {
-                            Label("Unlimited", systemImage: "crown.fill")
-                                .font(.caption)
-                                .foregroundStyle(.yellow)
+                            Text("\(DailyUsageTracker.todayCount) / \(DailyUsageTracker.proLimit)")
+                                .foregroundStyle(.secondary)
                         } else {
                             Text("\(DailyUsageTracker.todayCount) / \(DailyUsageTracker.freeLimit)")
                                 .foregroundStyle(
-                                    DailyUsageTracker.isLimitReached ? .red : .secondary
+                                    dailyLimitReached ? .red : .secondary
                                 )
                         }
                     }
@@ -29,48 +54,52 @@ struct SettingsView: View {
                         Button {
                             showPaywall = true
                         } label: {
-                            Label("Upgrade to Pro", systemImage: "crown")
+                            Label(strings.upgradeToPro, systemImage: "crown")
                         }
                         .foregroundStyle(Color.accentColor)
                     }
                 }
 
-                // AI Model section
-                Section("AI Model") {
+                Section(strings.languageSection) {
+                    Picker(strings.summaryLanguage, selection: outputLanguageBinding) {
+                        ForEach(OutputLanguagePreference.allCases) { preference in
+                            Text(strings.languagePreferenceName(preference)).tag(preference)
+                        }
+                    }
+
+                    Text(languageHelpText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                // AI Processing section
+                Section(strings.aiProcessing) {
                     HStack {
-                        Label("Gemma 4 E2B", systemImage: "cpu")
+                        Label(strings.mode, systemImage: "cloud.fill")
                         Spacer()
-                        Text("On-Device · ANE")
+                        Text(strings.cloudAI)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
 
                     HStack {
-                        Label("Status", systemImage: aiService.isModelLoaded ? "checkmark.circle.fill" : "hourglass")
+                        Label(strings.status, systemImage: aiService.isModelLoaded ? "checkmark.circle.fill" : "hourglass")
                         Spacer()
                         if aiService.isModelLoaded {
-                            Text("Ready")
+                            Text(strings.ready)
                                 .font(.caption)
                                 .foregroundStyle(.green)
-                        } else if aiService.isLoadingModel {
-                            HStack(spacing: 6) {
-                                ProgressView()
-                                    .scaleEffect(0.7)
-                                Text("Loading...")
-                                    .font(.caption)
-                                    .foregroundStyle(.orange)
-                            }
                         } else {
-                            Text("Idle")
+                            Text(strings.notConfigured)
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.orange)
                         }
                     }
 
                     HStack {
-                        Label("Speed", systemImage: "gauge.with.dots.needle.33percent")
+                        Label(strings.latency, systemImage: "bolt.fill")
                         Spacer()
-                        Text("~31 tok/s")
+                        Text(strings.perCardLatency)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -83,47 +112,79 @@ struct SettingsView: View {
                 }
 
                 // Privacy section
-                Section("Privacy") {
-                    Label("All data stays on your device", systemImage: "lock.shield.fill")
+                Section(strings.privacy) {
+                    Label(strings.articleExtractionOnDevice, systemImage: "doc.text.magnifyingglass")
                         .foregroundStyle(.green)
 
-                    Label("No internet required", systemImage: "wifi.slash")
+                    Label(strings.textSentToCloud, systemImage: "cloud.fill")
                         .foregroundStyle(.secondary)
 
-                    Label("Zero backend, zero tracking", systemImage: "eye.slash")
+                    Label(strings.sourceLinksAttached, systemImage: "link")
                         .foregroundStyle(.secondary)
+
+                    Label(strings.noAccountRequired, systemImage: "person.crop.circle.badge.xmark")
+                        .foregroundStyle(.secondary)
+
+                    Label(strings.cardsStoredLocally, systemImage: "lock.shield.fill")
+                        .foregroundStyle(.green)
                 }
 
                 // Account section
-                Section("Account") {
+                Section(strings.account) {
                     if subscriptionService.isPremium {
-                        Label("Pro Active", systemImage: "checkmark.seal.fill")
+                        Label(strings.proActive, systemImage: "checkmark.seal.fill")
                             .foregroundStyle(.green)
                     }
 
-                    Button("Restore Purchases") {
+                    Button(strings.restorePurchases) {
                         Task { await subscriptionService.restorePurchases() }
                     }
                 }
 
                 // About section
-                Section("About") {
+                Section(strings.about) {
                     HStack {
-                        Label("Version", systemImage: "info.circle")
+                        Label(strings.version, systemImage: "info.circle")
                         Spacer()
                         Text("1.0.0")
                             .foregroundStyle(.secondary)
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        guard canToggleUnlimitedMode else { return }
+                        versionTapCount += 1
+                        if versionTapCount >= Self.unlimitedModeTapThreshold {
+                            versionTapCount = 0
+                            unlimitedEnabled.toggle()
+                            DailyUsageTracker.setUnlimitedMode(unlimitedEnabled)
+                        }
+                    }
 
-                    Link(destination: URL(string: "https://omnisift.app/privacy")!) {
-                        Label("Privacy Policy", systemImage: "hand.raised.fill")
+                    if canToggleUnlimitedMode && unlimitedEnabled {
+                        Label(strings.unlimitedModeActive, systemImage: "infinity")
+                            .foregroundStyle(.orange)
+                    }
+
+                    Link(destination: URL(string: "https://huangweijun.github.io/omnisift/privacy-policy.html")!) {
+                        Label(strings.privacyPolicy, systemImage: "hand.raised.fill")
                     }
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(strings.settingsTab)
             .sheet(isPresented: $showPaywall) {
                 ProPaywallView()
             }
+        }
+    }
+
+    private var languageHelpText: String {
+        switch outputLanguageBinding.wrappedValue {
+        case .automatic:
+            strings.autoLanguageHelp
+        case .simplifiedChinese:
+            strings.chineseLanguageHelp
+        case .english:
+            strings.englishLanguageHelp
         }
     }
 }

@@ -30,7 +30,7 @@ mkdir -p "$MODEL_DIR"
 
 # Download model files (exclude conversion scripts and docs)
 echo "Downloading model files..."
-huggingface-cli download "$REPO" \
+hf download "$REPO" \
     --revision "$BRANCH" \
     --local-dir "$MODEL_DIR" \
     --include "*.mlmodelc/*" "*.bin" "*.npy" "model_config.json" "hf_model/*" \

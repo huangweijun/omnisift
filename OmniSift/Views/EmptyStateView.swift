@@ -1,6 +1,13 @@
 import SwiftUI
 
 struct EmptyStateView: View {
+    @AppStorage(UserDefaultsKeys.outputLanguagePreference, store: UserDefaults(suiteName: appGroupID))
+    private var outputLanguageRawValue = OutputLanguagePreference.automatic.rawValue
+
+    private var strings: AppStrings {
+        AppStrings(rawPreferenceValue: outputLanguageRawValue)
+    }
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -18,10 +25,10 @@ struct EmptyStateView: View {
 
             // Text
             VStack(spacing: 8) {
-                Text("Start Collecting")
+                Text(strings.startCollecting)
                     .font(.title2.weight(.bold))
 
-                Text("Share text from any app to capture\nAI insights and knowledge snippets.")
+                Text(strings.emptyStateDescription)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -33,22 +40,22 @@ struct EmptyStateView: View {
                 InstructionRow(
                     step: "1",
                     icon: "hand.tap",
-                    text: "Select text in any app"
+                    text: strings.instructionOpen
                 )
                 InstructionRow(
                     step: "2",
                     icon: "square.and.arrow.up",
-                    text: "Tap the Share button"
+                    text: strings.instructionShare
                 )
                 InstructionRow(
                     step: "3",
                     icon: "app.fill",
-                    text: "Choose OmniSift"
+                    text: strings.instructionChooseApp
                 )
                 InstructionRow(
                     step: "4",
                     icon: "sparkles",
-                    text: "AI cleans & archives locally"
+                    text: strings.instructionAI
                 )
             }
             .padding(20)

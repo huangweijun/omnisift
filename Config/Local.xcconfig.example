@@ -1,0 +1,5 @@
+// Local configuration — copy this file to Local.xcconfig and fill in local-only values.
+// Local.xcconfig is NOT tracked in git (*.xcconfig is in .gitignore).
+
+REVENUECAT_API_KEY = your-revenuecat-public-sdk-key-here
+OMNISIFT_IOS_APP_SECRET = your-backend-proxy-ios-secret-here

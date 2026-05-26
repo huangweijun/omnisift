@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OmniSift - AI Cross-App Knowledge Capture</title>
-  <meta name="description" content="OmniSift is an iOS AI knowledge capture app that turns text, links, articles, and screenshots from any app into structured knowledge cards.">
+  <title>OmniSift - Capture Ideas, Light Your Knowledge Star Map</title>
+  <meta name="description" content="OmniSift is an iOS AI knowledge capture app that collects text, links, screenshots, and copied Xiaohongshu links, lights up a personal knowledge star map, and uses a compass to guide what to explore next.">
   <link rel="canonical" href="https://omnisift.app/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="OmniSift - AI Cross-App Knowledge Capture">
-  <meta property="og:description" content="Save snippets from any iOS app and turn them into AI-structured knowledge cards, summaries, tags, entities, and graph connections.">
+  <meta property="og:title" content="OmniSift - Capture Ideas, Light Your Knowledge Star Map">
+  <meta property="og:description" content="Collect scattered ideas from iOS apps, turn them into structured cards, light up topic constellations, and follow a knowledge compass toward the next route.">
   <meta property="og:url" content="https://omnisift.app/">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="OmniSift - AI Cross-App Knowledge Capture">
-  <meta name="twitter:description" content="An iOS Share Sheet workflow for turning scattered ideas into structured knowledge cards.">
+  <meta name="twitter:title" content="OmniSift - Capture Ideas, Light Your Knowledge Star Map">
+  <meta name="twitter:description" content="An iOS capture workflow that turns scattered ideas into a personal star map and knowledge compass.">
   <link rel="stylesheet" href="styles.css">
   <script type="application/ld+json">
   {
@@ -22,7 +22,7 @@
     "alternateName": "知漏",
     "applicationCategory": "ProductivityApplication",
     "operatingSystem": "iOS",
-    "description": "OmniSift is an iOS AI knowledge capture app that lets users save text, links, articles, and screenshots from any app through the iOS Share Sheet, then turns them into structured knowledge cards with summaries, highlights, tags, entities, and knowledge graph connections.",
+    "description": "OmniSift is an iOS AI knowledge capture app that lets users save text, links, articles, screenshots, copied images, and copied Xiaohongshu links, then turns them into structured cards that light up a personal knowledge star map and inform a knowledge compass.",
     "offers": [
       {
         "@type": "Offer",
@@ -73,29 +73,10 @@
   <main>
     <section class="hero">
       <div class="hero-inner">
-        <div class="hero-scene" aria-hidden="true">
-          <div class="scene-node">ChatGPT</div>
-          <div class="scene-node">Safari</div>
-          <div class="scene-node">WeChat</div>
-          <div class="scene-node">Notes</div>
-          <div class="scene-card primary">
-            <span class="scene-pill">AI knowledge card</span>
-            <div class="scene-title">Why this answer is worth saving</div>
-            <div class="scene-line"></div>
-            <div class="scene-line"></div>
-            <div class="scene-line short"></div>
-          </div>
-          <div class="scene-card secondary">
-            <span class="scene-pill">Entities + relations</span>
-            <div class="scene-title">Claude -> research notes -> next search</div>
-            <div class="scene-line"></div>
-            <div class="scene-line short"></div>
-          </div>
-        </div>
         <div class="hero-copy">
-          <div class="eyebrow" data-i18n="home.eyebrow">iOS Share Sheet + AI knowledge cards</div>
+          <div class="eyebrow" data-i18n="home.eyebrow">Capture -> Star Map -> Compass</div>
           <h1 data-i18n="home.title">OmniSift</h1>
-          <p class="hero-subtitle" data-i18n="home.hero">Save text, links, articles, and screenshots from any app. OmniSift turns scattered snippets into structured knowledge cards with summaries, highlights, tags, entities, and connections.</p>
+          <p class="hero-subtitle" data-i18n="home.hero">Collect ideas from iOS apps, copied links, and screenshots. OmniSift turns each fragment into a card, lights up your knowledge star map, and points a compass toward what to explore next.</p>
           <div class="cta-row">
             <a class="button primary" href="mailto:omnisift.app@gmail.com?subject=OmniSift%20launch%20notice" data-app-store-link>Coming soon on the App Store</a>
             <a class="button secondary" href="mailto:omnisift.app@gmail.com?subject=OmniSift%20launch%20notice" data-i18n="cta.launch">Get launch notice</a>
@@ -106,33 +87,89 @@
             <span data-i18n="home.proof.tracking">No tracking or analytics</span>
           </div>
         </div>
+        <div class="astro-console" aria-hidden="true">
+          <div class="starfield">
+            <span class="star s1 lit"></span>
+            <span class="star s2 lit"></span>
+            <span class="star s3"></span>
+            <span class="star s4 lit"></span>
+            <span class="star s5"></span>
+            <span class="star s6 lit"></span>
+            <span class="star s7"></span>
+            <span class="star s8 lit"></span>
+            <span class="route r1"></span>
+            <span class="route r2"></span>
+            <span class="route r3"></span>
+            <div class="constellation-card card-a">
+              <span>Lit constellation</span>
+              <strong>AI Reading</strong>
+            </div>
+            <div class="constellation-card card-b">
+              <span>Dim zone</span>
+              <strong>Missing counterpoints</strong>
+            </div>
+          </div>
+          <div class="compass-dial">
+            <span class="dial-label north">Route</span>
+            <span class="dial-label east">Pattern</span>
+            <span class="dial-label south">Dark</span>
+            <span class="dial-label west">Lit</span>
+            <span class="needle"></span>
+            <span class="dial-core"></span>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="section" id="workflow">
       <div class="section-header">
         <p class="section-kicker" data-i18n="home.workflow.kicker">How it works</p>
-        <h2 data-i18n="home.workflow.title">One iOS share action becomes a knowledge card.</h2>
-        <p class="lead" data-i18n="home.workflow.lead">OmniSift is built for ideas that appear outside your notes app: AI answers, web paragraphs, chat messages, screenshots, and saved links.</p>
+        <h2 data-i18n="home.workflow.title">Collect fragments. Light constellations. Follow the next route.</h2>
+        <p class="lead" data-i18n="home.workflow.lead">OmniSift is built for ideas that appear outside your notes app: AI answers, web paragraphs, chat messages, Xiaohongshu links, screenshots, and copied images.</p>
       </div>
       <div class="grid three">
         <article class="card">
           <span class="num">1</span>
-          <h3 data-i18n="home.step1.title">Share from any app</h3>
-          <p class="en">Select text, share a link, save an article, or send a screenshot through the iOS Share Sheet.</p>
-          <p class="zh">在任意 App 中选中文字、分享链接、保存文章或发送截图到知漏。</p>
+          <h3 data-i18n="home.step1.title">Capture without sorting first</h3>
+          <p class="en">Use the iOS Share Sheet, copy a supported link, or copy an image. OmniSift prompts before collecting from the clipboard.</p>
+          <p class="zh">通过 iOS 分享菜单、复制受支持链接或复制图片收集内容；从剪贴板采集前，知漏会先询问确认。</p>
         </article>
         <article class="card blue">
           <span class="num">2</span>
-          <h3 data-i18n="home.step2.title">AI distills the snippet</h3>
-          <p class="en">Cloud AI extracts a title, summary, highlights, tags, named entities, and semantic relations.</p>
-          <p class="zh">云端 AI 自动提炼标题、摘要、高亮、标签、实体和语义关系。</p>
+          <h3 data-i18n="home.step2.title">Cards light the star map</h3>
+          <p class="en">Cloud AI extracts a title, summary, tags, entities, relations, and readable Markdown originals when the source can be parsed.</p>
+          <p class="zh">云端 AI 提炼标题、摘要、标签、实体和关系；原文可解析时，会整理成更适合阅读的 Markdown。</p>
         </article>
         <article class="card coral">
           <span class="num">3</span>
-          <h3 data-i18n="home.step3.title">Review and connect</h3>
-          <p class="en">Browse your library, search saved cards, and revisit ideas through a growing personal knowledge graph.</p>
-          <p class="zh">回到知识库中浏览、搜索，并通过个人知识图谱重新发现关联。</p>
+          <h3 data-i18n="home.step3.title">The compass points forward</h3>
+          <p class="en">The compass reads lit themes, patterns, dark zones, and routes, then suggests what to search, compare, or collect next.</p>
+          <p class="zh">罗盘读取已点亮主题、模式、暗区和路线，提示下一步该搜索、比较或补齐什么。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section constellation-section">
+      <div class="section-header">
+        <p class="section-kicker" data-i18n="home.starmap.kicker">Knowledge star map</p>
+        <h2 data-i18n="home.starmap.title">Your reading becomes visible.</h2>
+        <p class="lead" data-i18n="home.starmap.lead">Each saved card is a star. Topics become constellations. More collected evidence lights more of the map, making patterns and gaps easier to see.</p>
+      </div>
+      <div class="feature-orbit">
+        <article>
+          <span class="orbit-dot lit"></span>
+          <h3 data-i18n="home.starmap.capture.title">Fast collection</h3>
+          <p data-i18n="home.starmap.capture.body">Share text, articles, screenshots, copied images, and copied Xiaohongshu links without manually filing them first.</p>
+        </article>
+        <article>
+          <span class="orbit-dot"></span>
+          <h3 data-i18n="home.starmap.organize.title">Topic organization</h3>
+          <p data-i18n="home.starmap.organize.body">Use AI to merge, rename, and clean topic structures so the map stays navigable as it grows.</p>
+        </article>
+        <article>
+          <span class="orbit-dot lit"></span>
+          <h3 data-i18n="home.starmap.compass.title">Compass guidance</h3>
+          <p data-i18n="home.starmap.compass.body">Summarize lit constellations, reveal dim areas, and get concrete exploration routes.</p>
         </article>
       </div>
     </section>
@@ -143,11 +180,11 @@
           <div>
             <p class="section-kicker" data-i18n="home.positioning.kicker">Positioning</p>
             <h2 data-i18n="home.positioning.title">Not another place to type notes.</h2>
-            <p class="lead" data-i18n="home.positioning.lead">OmniSift starts where ideas actually show up: inside ChatGPT, Claude, Safari, WeChat, X, Notes, and screenshots. It focuses on capture, structure, and recall.</p>
+            <p class="lead" data-i18n="home.positioning.lead">OmniSift starts where ideas actually show up: inside ChatGPT, Claude, Safari, WeChat, Xiaohongshu, X, Notes, and screenshots. It focuses on capture, structure, visibility, and next-step guidance.</p>
           </div>
           <div class="quote-panel">
-            <p class="en"><strong>OmniSift is an iOS AI knowledge capture app.</strong> It lets users save text, links, articles, and screenshots from any app through the iOS Share Sheet, then turns them into structured knowledge cards. Cards are stored locally on device. No account is required.</p>
-            <p class="zh"><strong>知漏是一款 iOS AI 知识捕获应用。</strong>用户可以通过系统分享菜单，从任意 App 保存文本、链接、文章和截图；知漏会将这些碎片整理成结构化知识卡片。卡片保存在设备本地，无需注册账号。</p>
+            <p class="en"><strong>OmniSift is an iOS AI knowledge capture app.</strong> It turns scattered fragments into structured cards, lights a personal star map, and uses a compass view to summarize themes, gaps, and exploration routes. Cards are stored locally on device. No account is required.</p>
+            <p class="zh"><strong>知漏是一款 iOS AI 知识捕获应用。</strong>它把分散片段整理成结构化卡片，点亮个人知识星图，并通过罗盘总结主题、缺口和下一条探索路线。卡片保存在设备本地，无需注册账号。</p>
           </div>
         </div>
       </div>

@@ -7,15 +7,17 @@ options:
   defaultConfig: Release
   createIntermediateGroups: true
 
+configFiles:
+  Debug: Config/Shared.xcconfig
+  Release: Config/Shared.xcconfig
+
 settings:
   base:
     SWIFT_VERSION: "6.0"
     TARGETED_DEVICE_FAMILY: "1"
+    DEVELOPMENT_TEAM: "M943X5V7RF"
 
 packages:
-  CoreMLLLM:
-    url: https://github.com/john-rocky/CoreML-LLM
-    from: "0.5.0"
   RevenueCat:
     url: https://github.com/RevenueCat/purchases-ios
     from: "5.0.0"
@@ -28,35 +30,37 @@ targets:
     sources:
       - path: OmniSift
       - path: Shared
-      - path: Models
-        type: folder
-        buildPhase: resources
-        optional: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.omnisift.app
         PRODUCT_NAME: OmniSift
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: "知漏"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIRequiresFullScreen: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.productivity"
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_REVENUECAT_API_KEY: "$(REVENUECAT_API_KEY)"
+        INFOPLIST_KEY_OMNISIFT_IOS_APP_SECRET: "$(OMNISIFT_IOS_APP_SECRET)"
+        INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "Save insight cards as images to your photo library"
         CODE_SIGN_ENTITLEMENTS: OmniSift/OmniSift.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "1"
+        CURRENT_PROJECT_VERSION: "2"
     entitlements:
       path: OmniSift/OmniSift.entitlements
       properties:
         com.apple.security.application-groups:
           - group.com.omnisift.shared
-        com.apple.developer.kernel.increased-memory-limit: true
     dependencies:
       - target: ShareExtension
-      - package: CoreMLLLM
+        embed: true
+        codeSign: true
       - package: RevenueCat
         product: RevenueCat
       - package: RevenueCat
@@ -73,16 +77,14 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.omnisift.app.share
         PRODUCT_NAME: ShareExtension
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: "知漏分享"
-        INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.share-services
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: ShareExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: ShareExtension/ShareExtension.entitlements
         MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "1"
+        CURRENT_PROJECT_VERSION: "2"
     entitlements:
       path: ShareExtension/ShareExtension.entitlements
       properties:
         com.apple.security.application-groups:
           - group.com.omnisift.shared
-    info:
-      path: ShareExtension/Info.plist

@@ -1,0 +1,7 @@
+// Shared defaults committed to the repository.
+// Local-only values can override these through Config/Local.xcconfig.
+
+REVENUECAT_API_KEY =
+OMNISIFT_IOS_APP_SECRET =
+
+#include? "Local.xcconfig"

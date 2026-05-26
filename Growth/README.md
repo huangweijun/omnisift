@@ -2,6 +2,15 @@
 
 This folder turns the growth plan into repeatable files and scripts.
 
+## Launch Playbook
+
+- `Growth/search-submission-checklist.md`: Google Search Console and Bing Webmaster Tools checklist.
+- `Growth/auto-growth-geo-plan.md`: strategy notes for the automated promotion and GEO system.
+
+## Current Public Positioning
+
+OmniSift should be described as: capture ideas, light a personal knowledge star map, and use a knowledge compass to decide what to explore next. Keep pricing public as Free 5 AI processing uses per day and Pro 50 AI processing uses per day.
+
 ## Commands
 
 Run from the repository root:

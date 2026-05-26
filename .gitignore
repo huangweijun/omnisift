@@ -52,6 +52,14 @@ Models/**/hf_model/
 .env
 *.xcconfig
 !SharedConfig.xcconfig
+!Config/Shared.xcconfig
+**/Secrets.plist
+*.p8
+
+# Local tooling and vendored experiments
+.playwright-mcp/
+LocalPackages/
+Growth/app-launch-growth-playbook.md
 
 # Screenshots from research
 *.png

@@ -1,6 +1,6 @@
 # OmniSift
 
-OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets users save text, links, articles, and screenshots from any app through the iOS Share Sheet, then turns those snippets into structured knowledge cards.
+OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets users collect text, links, articles, screenshots, copied images, and copied Xiaohongshu links, then turns those fragments into structured cards that light up a personal knowledge star map and inform a knowledge compass.
 
 ## Core pages
 
@@ -16,9 +16,9 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 
 - Platform: iOS
 - Category: Productivity / Reference
-- Input types: text, links, articles, screenshots
-- Capture entrypoint: iOS Share Sheet
-- Output: title, summary, highlights, tags, named entities, semantic relations, related insights, knowledge graph connections
+- Input types: text, links, articles, screenshots, copied images, copied Xiaohongshu links
+- Capture entrypoints: iOS Share Sheet and clipboard-assisted capture with user confirmation
+- Output: title, summary, highlights, tags, named entities, semantic relations, readable Markdown original when source text is available, related insights, topic constellations, knowledge star map, compass guidance
 - Account requirement: no account required
 - Analytics and tracking: no analytics services, advertising frameworks, or tracking technologies
 - Storage: processed knowledge cards are stored locally on device
@@ -34,11 +34,11 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 
 ## Short description
 
-OmniSift is for people who find useful ideas in ChatGPT, Claude, Safari, Notes, WeChat, X, screenshots, and other iOS apps. Instead of manually copying snippets into a note app, they can share the content to OmniSift and receive a structured knowledge card.
+OmniSift is for people who find useful ideas in ChatGPT, Claude, Safari, Notes, WeChat, Xiaohongshu, X, screenshots, and other iOS apps. Instead of manually copying snippets into a note app, they can send or copy content to OmniSift, receive a structured knowledge card, watch topic constellations light up, and use the knowledge compass to decide what to search, compare, or collect next.
 
 ## Chinese description
 
-知漏是一款 iOS AI 知识捕获应用。用户可以通过系统分享菜单，从任意 App 保存文本、链接、文章和截图；知漏会将这些碎片整理成包含摘要、高亮、标签、实体和知识图谱关联的结构化知识卡片。卡片保存在设备本地，无需注册账号。
+知漏是一款 iOS AI 知识捕获应用。用户可以通过系统分享菜单和确认后的剪贴板辅助采集，从任意 App 保存文本、链接、文章、截图、复制图片和小红书链接；知漏会将这些碎片整理成结构化知识卡片，点亮个人知识星图，并通过知识罗盘提示下一步探索路线。卡片保存在设备本地，无需注册账号。
 
 ## Contact
 

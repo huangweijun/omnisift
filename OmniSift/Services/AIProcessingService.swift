@@ -1,11 +1,9 @@
 import Foundation
 import SwiftData
-#if canImport(CoreMLLLM)
-import CoreMLLLM
-#endif
 
-/// Service responsible for processing pending InsightCards using the local Gemma 4 model.
-/// The model is bundled directly in the app — no download needed, works offline immediately.
+/// Service responsible for processing pending InsightCards.
+/// Uses cloud API by default (fast, no memory pressure).
+/// Local model is optional premium offline feature.
 @MainActor
 @Observable
 class AIProcessingService {
@@ -15,74 +13,45 @@ class AIProcessingService {
     var processingProgress: Double = 0
     var currentCardID: UUID?
     var errorMessage: String?
+    var showLimitReachedPaywall = false
 
-    #if canImport(CoreMLLLM)
-    private var llm: CoreMLLLM?
-    #endif
+    /// Processing mode
+    enum ProcessingMode: String, CaseIterable {
+        case cloud = "Cloud AI"
+        case local = "On-Device"
+    }
 
+    var processingMode: ProcessingMode = .cloud
+
+    private let cloudService = CloudAIService()
+    private let webExtractionService = WebContentExtractionService()
+    private let browserExtractionService = BrowserContentExtractionService()
+    private let imageTextExtractionService = ImageTextExtractionService()
     private var modelContext: ModelContext?
-
-    /// Maximum input characters to send to the model (prevents OOM on very long texts)
-    private static let maxInputChars = 2000
-
-    /// System prompt for the AI cleaning task
-    private let systemPrompt = """
-    You are a knowledge distillation assistant. Given raw text from an AI conversation or web content:
-    1. Extract the single most important insight as a one-line "highlight" (max 50 words).
-    2. Write a concise "title" (max 10 words) that captures the topic.
-    3. Clean and restructure the content into a brief "summary" (max 200 words) in Markdown.
-    4. Remove pleasantries, filler, ads, navigation text, and AI disclaimers.
-    5. Suggest 1-3 relevant tags from: AI, Code, Design, Business, Science, Health, Writing, Productivity.
-
-    Respond ONLY with this JSON (no markdown fences, no extra text):
-    {"title":"...","highlight":"...","summary":"...","tags":["...",".."]}
-    """
 
     func configure(modelContext: ModelContext) {
         self.modelContext = modelContext
+        // Cloud mode is always "ready"
+        if processingMode == .cloud {
+            isModelLoaded = true
+        }
     }
 
-    // MARK: - Model Lifecycle
+    // MARK: - Model Lifecycle (only relevant for local mode)
 
-    /// Load the Gemma 4 model from the app bundle (no download needed).
     func loadModel() async {
-        guard !isModelLoaded, !isLoadingModel else { return }
-        errorMessage = nil
-        isLoadingModel = true
-
-        #if canImport(CoreMLLLM)
-        do {
-            // Load from the bundled model directory inside the app
-            guard let modelURL = Bundle.main.url(forResource: "gemma4e2b", withExtension: nil, subdirectory: "Models") else {
-                // Fallback: check if models are in the top-level bundle
-                guard let altURL = Bundle.main.resourceURL?.appendingPathComponent("Models/gemma4e2b") else {
-                    errorMessage = "Model files not found in app bundle"
-                    isLoadingModel = false
-                    return
-                }
-                llm = try await CoreMLLLM.load(from: altURL)
-                isLoadingModel = false
-                isModelLoaded = true
-                return
-            }
-            llm = try await CoreMLLLM.load(from: modelURL)
-            isLoadingModel = false
+        if processingMode == .cloud {
             isModelLoaded = true
-        } catch {
-            isLoadingModel = false
-            errorMessage = "Model load failed: \(error.localizedDescription)"
+            return
         }
-        #else
-        // Simulator fallback: mock mode
-        try? await Task.sleep(for: .milliseconds(500))
-        isLoadingModel = false
-        isModelLoaded = true
-        #endif
+        // Local model loading disabled — causes OOM on devices with < 8GB RAM.
+        // iPhone 13 Pro (6GB) cannot load the 2.5GB monolithic model + 2.7GB embeddings.
+        errorMessage = AppStrings(rawPreferenceValue: OutputLanguagePreference.stored.rawValue).onDeviceModelUnavailable
+        isModelLoaded = false
     }
 
     // MARK: - Batch Processing
 
-    /// Process all pending cards (respects free tier limit)
     func processAllPending() async {
         guard isModelLoaded, !isProcessing else { return }
         guard let modelContext else { return }
@@ -102,8 +71,8 @@ class AIProcessingService {
         let isPremium = UserDefaults(suiteName: appGroupID)?.bool(forKey: "isPremium") ?? false
 
         for (index, card) in pendingCards.enumerated() {
-            // Check free tier limit (skip if reached and not premium)
-            if !isPremium && DailyUsageTracker.isLimitReached {
+            if DailyUsageTracker.isLimitReached(isPremium: isPremium) {
+                showLimitReachedPaywall = true
                 break
             }
 
@@ -126,27 +95,51 @@ class AIProcessingService {
 
     private func processCard(_ card: InsightCard) async {
         do {
-            let inputText = String(card.rawText.prefix(Self.maxInputChars))
-            let fullResponse: String
-
-            #if canImport(CoreMLLLM)
-            if let llm {
-                fullResponse = try await generateWithLLM(llm, inputText: inputText)
-            } else {
-                fullResponse = mockGenerate(inputText: inputText)
+            await extractImageTextIfNeeded(for: card)
+            if card.contentType == .image, card.extractionStatus == .failed {
+                card.status = .failed
+                card.errorMessage = card.extractionError
+                try? modelContext?.save()
+                return
             }
-            #else
-            fullResponse = mockGenerate(inputText: inputText)
-            #endif
 
-            let result = parseAIResponse(fullResponse)
+            await extractSourceContentIfNeeded(for: card)
+
+            if applyLocalInaccessibleLinkSummaryIfNeeded(to: card) {
+                upsertTopics(for: card)
+                linkRelatedCards(for: card)
+                try? modelContext?.save()
+                return
+            }
+
+            let processingInput = ContentStructure.formattedForAIProcessing(
+                title: card.sourceTitle ?? card.title,
+                body: card.rawText
+            )
+            let result = try await cloudService.process(rawText: processingInput)
 
             card.title = result.title
             card.highlight = result.highlight
             card.summary = result.summary
             card.tags = result.tags
+            card.topicNames = result.topics.isEmpty ? result.tags : result.topics
+            card.keywordNames = result.keywords
+            card.entityNames = result.entities.map(\.name)
+            card.relationSummaries = result.relations.map { "\($0.source) \($0.predicate) \($0.target)" }
+            card.formattedOriginalMarkdown = result.formattedOriginalMarkdown
+            card.confidence = result.confidence
             card.status = .processed
             card.processedAt = Date()
+            card.errorMessage = nil
+
+            if card.sourceApp == nil || card.sourceApp == "Unknown" {
+                card.sourceApp = inferSourceApp(from: card.sourceURL)
+            }
+
+            upsertTopics(for: card)
+            upsertEntities(result.entities, for: card)
+            upsertKnowledgeRelations(result.relations, confidence: result.confidence, for: card)
+            linkRelatedCards(for: card)
 
             DailyUsageTracker.incrementUsage()
             try? modelContext?.save()
@@ -157,129 +150,390 @@ class AIProcessingService {
         }
     }
 
-    // MARK: - LLM Inference
-
-    #if canImport(CoreMLLLM)
-    private func generateWithLLM(_ llm: CoreMLLLM, inputText: String) async throws -> String {
-        let messages: [CoreMLLLM.Message] = [
-            .init(role: .user, content: """
-            \(systemPrompt)
-
-            ---
-            RAW TEXT:
-            \(inputText)
-            """)
-        ]
-
-        var fullResponse = ""
-        let stream = try await llm.generate(messages, maxTokens: 512)
-        for await token in stream {
-            fullResponse += token
-        }
-        return fullResponse
-    }
-    #endif
-
-    /// Mock generation for simulator/development
-    private func mockGenerate(inputText: String) -> String {
-        let sentences = inputText.components(separatedBy: CharacterSet(charactersIn: ".!?\n"))
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-
-        let title = String((sentences.first ?? "Untitled").prefix(60))
-        let highlight = sentences.count > 1
-            ? String(sentences[1].prefix(120))
-            : String(inputText.prefix(120))
-        let summary = String(inputText.prefix(500))
-        let tags = detectTags(from: inputText)
-
-        let tagsJSON = tags.map { "\"\($0)\"" }.joined(separator: ",")
-        return """
-        {"title":"\(escapeJSON(title))","highlight":"\(escapeJSON(highlight))","summary":"\(escapeJSON(summary))","tags":[\(tagsJSON)]}
-        """
-    }
-
-    private func escapeJSON(_ string: String) -> String {
-        string
-            .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "\"", with: "\\\"")
-            .replacingOccurrences(of: "\n", with: "\\n")
-            .replacingOccurrences(of: "\r", with: "\\r")
-            .replacingOccurrences(of: "\t", with: "\\t")
-    }
-
-    // MARK: - Response Parsing
-
-    private func parseAIResponse(_ response: String) -> AIResult {
-        let jsonString = extractJSON(from: response)
-
-        if let data = jsonString.data(using: .utf8),
-           let parsed = try? JSONDecoder().decode(AIResponseJSON.self, from: data) {
-            return AIResult(
-                title: parsed.title,
-                highlight: parsed.highlight,
-                summary: parsed.summary,
-                tags: parsed.tags
-            )
+    /// Retry a single failed card
+    func retryCard(_ card: InsightCard) async {
+        guard card.status == .failed else { return }
+        let isPremium = UserDefaults(suiteName: appGroupID)?.bool(forKey: "isPremium") ?? false
+        if DailyUsageTracker.isLimitReached(isPremium: isPremium) {
+            showLimitReachedPaywall = true
+            return
         }
 
-        return fallbackExtract(from: response)
+        card.status = .processing
+        card.errorMessage = nil
+        try? modelContext?.save()
+
+        await processCard(card)
     }
 
-    private func extractJSON(from text: String) -> String {
-        guard let start = text.firstIndex(of: "{"),
-              let end = text.lastIndex(of: "}") else {
-            return text
-        }
-        return String(text[start...end])
-    }
+    /// Retry all failed cards
+    func retryAllFailed() async {
+        guard isModelLoaded, !isProcessing else { return }
+        guard let modelContext else { return }
 
-    private func fallbackExtract(from text: String) -> AIResult {
-        let lines = text.components(separatedBy: .newlines)
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+        isProcessing = true
+        defer { isProcessing = false }
 
-        let title = String((lines.first ?? "Untitled").prefix(60))
-        let highlight = lines.count > 1 ? String(lines[1].prefix(120)) : title
-        let summary = lines.dropFirst().joined(separator: "\n")
-
-        return AIResult(
-            title: title,
-            highlight: highlight,
-            summary: String(summary.prefix(800)),
-            tags: detectTags(from: text)
+        let failedRaw = ProcessingStatus.failed.rawValue
+        let descriptor = FetchDescriptor<InsightCard>(
+            predicate: #Predicate { $0.statusRawValue == failedRaw },
+            sortBy: [SortDescriptor(\.createdAt)]
         )
+
+        guard let failedCards = try? modelContext.fetch(descriptor),
+              !failedCards.isEmpty else { return }
+
+        for card in failedCards {
+            let isPremium = UserDefaults(suiteName: appGroupID)?.bool(forKey: "isPremium") ?? false
+            if DailyUsageTracker.isLimitReached(isPremium: isPremium) { break }
+
+            card.status = .processing
+            card.errorMessage = nil
+            try? modelContext.save()
+
+            await processCard(card)
+        }
     }
 
-    private func detectTags(from text: String) -> [String] {
-        let keywords: [(String, [String])] = [
-            ("AI", ["ai", "machine learning", "model", "neural", "llm", "gpt", "claude", "gemini"]),
-            ("Code", ["code", "function", "swift", "python", "api", "programming", "debug"]),
-            ("Design", ["design", "ui", "ux", "layout", "color", "font", "interface"]),
-            ("Business", ["revenue", "growth", "market", "startup", "product", "strategy"]),
-            ("Science", ["research", "experiment", "data", "hypothesis", "physics", "biology"]),
-            ("Productivity", ["workflow", "efficiency", "habit", "tool", "automate", "system"]),
+    // MARK: - Content Extraction
+
+    private func extractImageTextIfNeeded(for card: InsightCard) async {
+        guard card.contentType == .image,
+              let attachmentFileName = card.attachmentFileName else {
+            return
+        }
+
+        card.extractionStatus = .pending
+        card.extractionError = nil
+        try? modelContext?.save()
+
+        let result = await imageTextExtractionService.extractText(fromAttachmentNamed: attachmentFileName)
+        if result.status == .failed {
+            card.extractionStatus = .failed
+            card.extractionError = result.errorMessage
+            return
+        }
+
+        card.rawText = result.text
+        card.extractionStatus = result.status
+        card.extractionError = nil
+    }
+
+    private func extractSourceContentIfNeeded(for card: InsightCard) async {
+        guard let sourceURL = card.sourceURL else { return }
+        guard card.extractionStatus == .urlOnly ||
+              card.extractionStatus == .partialText ||
+              card.extractionStatus == .failed else {
+            return
+        }
+
+        card.extractionStatus = .pending
+        card.extractionError = nil
+        try? modelContext?.save()
+
+        let fetchResult = await webExtractionService.extract(from: sourceURL)
+        let result = await resolveBestURLExtraction(
+            initialResult: fetchResult,
+            sourceURL: sourceURL,
+            existingRawTextCount: card.rawText.count
+        )
+
+        if result.status == .failed {
+            card.extractionStatus = .failed
+            card.extractionError = result.errorMessage
+            return
+        }
+
+        applyURLExtractionResult(result, to: card)
+    }
+
+    private func applyURLExtractionResult(
+        _ result: WebContentExtractionService.ExtractionResult,
+        to card: InsightCard
+    ) {
+        if let title = result.title?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !title.isEmpty,
+           card.sourceTitle?.isEmpty ?? true {
+            card.sourceTitle = title
+        }
+
+        let normalizedBody = ContentStructure.normalizeExtractedBody(
+            body: result.text,
+            title: card.sourceTitle
+        )
+
+        if normalizedBody.count > card.rawText.count {
+            card.rawText = normalizedBody
+        }
+
+        card.extractionStatus = result.status
+        card.extractionError = nil
+    }
+
+    private func resolveBestURLExtraction(
+        initialResult: WebContentExtractionService.ExtractionResult,
+        sourceURL: URL,
+        existingRawTextCount: Int
+    ) async -> WebContentExtractionService.ExtractionResult {
+        guard shouldTryBrowserExtraction(
+            result: initialResult,
+            existingRawTextCount: existingRawTextCount
+        ) else {
+            return initialResult
+        }
+
+        let browserResult = await browserExtractionService.extract(from: sourceURL)
+        return bestExtractionResult(initialResult, browserResult)
+    }
+
+    private func shouldTryBrowserExtraction(
+        result: WebContentExtractionService.ExtractionResult,
+        existingRawTextCount: Int
+    ) -> Bool {
+        if result.status == .failed {
+            return true
+        }
+
+        let extractedCount = max(result.text.count, existingRawTextCount)
+        return result.status == .partialText && extractedCount < 500
+    }
+
+    private func bestExtractionResult(
+        _ first: WebContentExtractionService.ExtractionResult,
+        _ second: WebContentExtractionService.ExtractionResult
+    ) -> WebContentExtractionService.ExtractionResult {
+        if second.status == .failed {
+            return first
+        }
+        if first.status == .failed {
+            return second
+        }
+        if second.text.count > first.text.count {
+            return second
+        }
+        if second.text.count == first.text.count,
+           second.title != nil,
+           first.title == nil {
+            return second
+        }
+        return first
+    }
+
+    private func applyLocalInaccessibleLinkSummaryIfNeeded(to card: InsightCard) -> Bool {
+        guard card.extractionStatus == .failed,
+              card.sourceURL != nil,
+              card.rawText.count < 500 else {
+            return false
+        }
+
+        let language = OutputLanguagePreference.stored.resolvedLanguage
+        card.title = card.sourceTitle ?? language.inaccessibleLinkTitle
+        card.highlight = language.inaccessibleLinkHighlight
+        card.summary = language.inaccessibleLinkSummary
+        card.tags = localizedFallbackLabels(for: language, english: ["Link", "Unreadable"])
+        card.topicNames = localizedFallbackLabels(for: language, english: ["Saved Links"])
+        card.keywordNames = localizedFallbackLabels(for: language, english: ["Blocked Page", "Shared Link"])
+        card.entityNames = []
+        card.relationSummaries = []
+        card.formattedOriginalMarkdown = nil
+        card.confidence = 0.2
+        card.status = .processed
+        card.processedAt = Date()
+        card.errorMessage = nil
+        return true
+    }
+
+    private func localizedFallbackLabels(for language: OutputLanguage, english: [String]) -> [String] {
+        guard language == .simplifiedChinese else {
+            return english
+        }
+
+        return english.map { label in
+            switch label {
+            case "Link": "链接"
+            case "Unreadable": "不可读取"
+            case "Saved Links": "已保存链接"
+            case "Blocked Page": "受限页面"
+            case "Shared Link": "分享链接"
+            default: label
+            }
+        }
+    }
+
+    // MARK: - Source App Inference
+
+    private func inferSourceApp(from url: URL?) -> String? {
+        guard let host = url?.host?.lowercased() else { return nil }
+        let mapping: [(String, String)] = [
+            ("deepseek.com", "DeepSeek"),
+            ("chat.openai.com", "ChatGPT"),
+            ("chatgpt.com", "ChatGPT"),
+            ("claude.ai", "Claude"),
+            ("perplexity.ai", "Perplexity"),
+            ("weixin.qq.com", "微信公众号"),
+            ("twitter.com", "Twitter"),
+            ("x.com", "X"),
+            ("zhihu.com", "知乎"),
+            ("notion.so", "Notion"),
+            ("github.com", "GitHub"),
+            ("youtube.com", "YouTube"),
+            ("bilibili.com", "Bilibili"),
+            ("xiaohongshu.com", "小红书"),
         ]
+        for (domain, name) in mapping {
+            if host.contains(domain) { return name }
+        }
+        return host.split(separator: ".").dropLast().last.map(String.init)?.capitalized
+    }
 
-        let lowered = text.lowercased()
-        return keywords
-            .filter { pair in pair.1.contains(where: { lowered.contains($0) }) }
-            .map(\.0)
+    // MARK: - Knowledge Organization
+
+    private func upsertTopics(for card: InsightCard) {
+        guard let modelContext else { return }
+        let cardID = card.id.uuidString
+
+        for name in card.topicNames.cleanedKnowledgeLabels(limit: 5) {
+            let key = name.normalizedKnowledgeKey
+            var descriptor = FetchDescriptor<Topic>(
+                predicate: #Predicate { $0.normalizedName == key }
+            )
+            descriptor.fetchLimit = 1
+
+            if let topic = try? modelContext.fetch(descriptor).first {
+                if !topic.cardIDStrings.contains(cardID) {
+                    topic.cardIDStrings.append(cardID)
+                }
+                topic.lastUpdatedAt = Date()
+            } else {
+                modelContext.insert(Topic(name: name, cardIDStrings: [cardID]))
+            }
+        }
+    }
+
+    private func upsertEntities(_ entities: [CloudAIService.ExtractedEntity], for card: InsightCard) {
+        guard let modelContext else { return }
+        let cardID = card.id.uuidString
+
+        for entity in entities {
+            let key = entity.name.normalizedKnowledgeKey
+            var descriptor = FetchDescriptor<KnowledgeEntity>(
+                predicate: #Predicate { $0.normalizedName == key }
+            )
+            descriptor.fetchLimit = 1
+
+            if let existingEntity = try? modelContext.fetch(descriptor).first {
+                if !existingEntity.cardIDStrings.contains(cardID) {
+                    existingEntity.cardIDStrings.append(cardID)
+                }
+                existingEntity.kind = entity.kind
+                existingEntity.lastSeenAt = Date()
+            } else {
+                modelContext.insert(KnowledgeEntity(name: entity.name, kind: entity.kind, cardIDStrings: [cardID]))
+            }
+        }
+    }
+
+    private func upsertKnowledgeRelations(
+        _ relations: [CloudAIService.ExtractedRelation],
+        confidence: Double,
+        for card: InsightCard
+    ) {
+        guard let modelContext else { return }
+        let cardID = card.id.uuidString
+        let descriptor = FetchDescriptor<KnowledgeRelation>(
+            predicate: #Predicate { $0.cardIDString == cardID }
+        )
+        let existingRelations = (try? modelContext.fetch(descriptor)) ?? []
+
+        for relation in relations {
+            let alreadyExists = existingRelations.contains {
+                $0.cardIDString == cardID &&
+                $0.sourceEntityName.normalizedKnowledgeKey == relation.source.normalizedKnowledgeKey &&
+                $0.targetEntityName.normalizedKnowledgeKey == relation.target.normalizedKnowledgeKey &&
+                $0.predicate.normalizedKnowledgeKey == relation.predicate.normalizedKnowledgeKey
+            }
+
+            if !alreadyExists {
+                modelContext.insert(KnowledgeRelation(
+                    sourceEntityName: relation.source,
+                    targetEntityName: relation.target,
+                    predicate: relation.predicate,
+                    cardIDString: cardID,
+                    confidence: confidence
+                ))
+            }
+        }
+    }
+
+    private func linkRelatedCards(for card: InsightCard) {
+        guard let modelContext else { return }
+        let cardID = card.id.uuidString
+        var descriptor = FetchDescriptor<InsightCard>(
+            predicate: #Predicate { $0.statusRawValue == "processed" },
+            sortBy: [SortDescriptor(\.processedAt, order: .reverse)]
+        )
+        descriptor.fetchLimit = 100
+        let processedCards = ((try? modelContext.fetch(descriptor)) ?? [])
+            .filter { $0.id != card.id }
+
+        let candidates = processedCards
+            .map { otherCard in
+                (card: otherCard, score: relatednessScore(between: card, and: otherCard))
+            }
+            .filter { $0.score > 0 }
+            .sorted { $0.score > $1.score }
+            .prefix(3)
+
+        card.relatedCardIDStrings = candidates.map { $0.card.id.uuidString }
+
+        let existingDescriptor = FetchDescriptor<CardRelation>(
+            predicate: #Predicate { $0.sourceCardIDString == cardID }
+        )
+        let existingRelations = (try? modelContext.fetch(existingDescriptor)) ?? []
+
+        for candidate in candidates {
+            let targetID = candidate.card.id.uuidString
+            guard !existingRelations.contains(where: { $0.targetCardIDString == targetID }) else {
+                continue
+            }
+            let sharedLabels = sharedKnowledgeLabels(between: card, and: candidate.card)
+            let strings = AppStrings(rawPreferenceValue: OutputLanguagePreference.stored.rawValue)
+            modelContext.insert(CardRelation(
+                sourceCardIDString: cardID,
+                targetCardIDString: targetID,
+                relationType: .related,
+                reason: sharedLabels.isEmpty ? strings.relatedReasonSimilar : "\(strings.relatedReasonSharedPrefix): \(sharedLabels.joined(separator: ", "))",
+                confidence: min(0.95, 0.45 + Double(candidate.score) * 0.1)
+            ))
+        }
+    }
+
+    private func relatednessScore(between first: InsightCard, and second: InsightCard) -> Int {
+        let firstLabels = Set((first.topicNames + first.tags + first.keywordNames + first.entityNames).map(\.normalizedKnowledgeKey))
+        let secondLabels = Set((second.topicNames + second.tags + second.keywordNames + second.entityNames).map(\.normalizedKnowledgeKey))
+        return firstLabels.intersection(secondLabels).count
+    }
+
+    private func sharedKnowledgeLabels(between first: InsightCard, and second: InsightCard) -> [String] {
+        let secondKeys = Set((second.topicNames + second.tags + second.keywordNames + second.entityNames).map(\.normalizedKnowledgeKey))
+        return (first.topicNames + first.tags + first.keywordNames + first.entityNames)
+            .filter { secondKeys.contains($0.normalizedKnowledgeKey) }
+            .cleanedKnowledgeLabels(limit: 3)
     }
 }
 
-// MARK: - Data Types
-
-private struct AIResult {
-    let title: String
-    let highlight: String
-    let summary: String
-    let tags: [String]
-}
-
-private struct AIResponseJSON: Decodable {
-    let title: String
-    let highlight: String
-    let summary: String
-    let tags: [String]
+private extension Array where Element == String {
+    func cleanedKnowledgeLabels(limit: Int) -> [String] {
+        var seen = Set<String>()
+        return compactMap { label -> String? in
+            let cleaned = label.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !cleaned.isEmpty else { return nil }
+            let key = cleaned.normalizedKnowledgeKey
+            guard !seen.contains(key) else { return nil }
+            seen.insert(key)
+            return cleaned
+        }
+        .prefix(limit)
+        .map { $0 }
+    }
 }
