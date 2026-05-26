@@ -26,8 +26,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Download repository archive
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://codeload.github.com/${GITHUB_REPOSITORY}/tar.gz/${GITHUB_SHA}" -o site.tar.gz
+          mkdir source
+          tar -xzf site.tar.gz -C source --strip-components=1
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -35,7 +39,7 @@ jobs:
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: source/docs
 
       - name: Deploy to GitHub Pages
         id: deployment
