@@ -34,4 +34,4 @@ The free plan includes 5 AI processing uses per day.
 
 ## What does OmniSift Pro include?
 
-OmniSift Pro includes 50 AI processing uses per day. Public first-release pricing is ¥12/month or ¥68/year.
+OmniSift Pro is designed for 50 AI processing uses per day. First-release pricing is planned at ¥12/month or ¥68/year when available through App Store subscriptions.

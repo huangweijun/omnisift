@@ -2,7 +2,9 @@
 
 ## v1.0 status
 
-OmniSift v1.0 is in App Store Developer review.
+OmniSift v1.0 is live on the App Store as of 2026-05-30.
+
+App Store URL: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4
 
 ## v1.0 focus
 
@@ -15,18 +17,19 @@ OmniSift v1.0 is in App Store Developer review.
 - Knowledge compass for lit themes, dim areas, patterns, and next routes
 - Related insights discovery
 - Free tier with 5 AI processing uses per day
-- Pro tier with 50 AI processing uses per day
+- Pro tier designed for 50 AI processing uses per day
+- Pro first-release pricing planned at ¥12/month or ¥68/year when available through App Store subscriptions
 
-## Public CTA before App Store approval
+## Public CTA after App Store approval
 
 Use:
 
-- Coming soon on the App Store
-- Get launch notice
+- Download on the App Store
+- See use cases
 - Contact: omnisift.app@gmail.com
 
 Do not use:
 
-- Download now
-- App Store URL
-- Pre-order language unless the App Store page supports it
+- Pre-order language
+- Lifetime or unlimited claims
+- Claims that Pro subscriptions are available in every storefront until App Store subscription review is complete

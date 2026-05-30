@@ -10,11 +10,13 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 - FAQ: https://omnisift.app/faq.html
 - Changelog: https://omnisift.app/changelog.html
 - Privacy: https://omnisift.app/privacy-policy.html
-- App Store: pending review, URL not public yet
+- App Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4
 
 ## Key facts
 
 - Platform: iOS
+- Current release: v1.0.0 is live on the App Store
+- Availability: globally released through App Store Connect
 - Category: Productivity / Reference
 - Input types: text, links, articles, screenshots, copied images, copied Xiaohongshu links
 - Capture entrypoints: iOS Share Sheet and clipboard-assisted capture with user confirmation
@@ -25,12 +27,13 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 - Cloud processing: text explicitly shared to OmniSift is sent to cloud AI for processing only
 - Cloud AI service listed in privacy policy: zaimaai.cn
 - Subscription handling: Apple App Store payment system via RevenueCat
+- Subscription availability: Pro subscriptions are handled by Apple and may depend on App Store subscription review/availability
 
 ## Pricing
 
 - Free: 5 AI processing uses per day
-- OmniSift Pro: 50 AI processing uses per day
-- Public first-release price: ¥12/month or ¥68/year
+- OmniSift Pro: designed for 50 AI processing uses per day
+- Planned first-release Pro price: ¥12/month or ¥68/year when available through App Store subscriptions
 
 ## Short description
 

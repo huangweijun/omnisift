@@ -3,7 +3,7 @@
   var defaultLanguage = "en";
 
   var config = {
-    appStoreUrl: ""
+    appStoreUrl: "https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
   };
 
   var copy = {
@@ -14,14 +14,14 @@
       "nav.compare": "Compare",
       "nav.faq": "FAQ",
       "nav.privacy": "Privacy",
-      "nav.launch": "Launch notice",
+      "nav.launch": "Download",
       "footer.tagline": "Capture ideas, light your knowledge star map.",
       "footer.home": "Home",
       "footer.changelog": "Changelog",
       "footer.contact": "Contact",
-      "app.pending": "Coming soon on the App Store",
+      "app.pending": "Download on the App Store",
       "app.live": "Download on the App Store",
-      "cta.launch": "Get launch notice",
+      "cta.launch": "See use cases",
       "cta.faq": "Read the FAQ",
       "cta.compare": "Compare workflows",
 
@@ -60,7 +60,7 @@
       "home.privacy.local.body": "Processed knowledge cards are stored locally on device. Text is sent to cloud AI only for processing.",
       "home.pricing.kicker": "Pricing",
       "home.pricing.title": "Free to start, Pro for heavier capture.",
-      "home.pricing.lead": "The public pricing copy matches the App Store metadata for the first release.",
+      "home.pricing.lead": "OmniSift is live as a free App Store download. Pro availability is handled through App Store subscriptions.",
       "home.pricing.free": "Free",
       "home.pricing.pro": "OmniSift Pro",
 
@@ -124,12 +124,12 @@
       "changelog.kicker": "Changelog",
       "changelog.title": "Launch notes for OmniSift.",
       "changelog.lead": "This page records public product updates so users, search engines, and AI answer engines can follow what changed over time.",
-      "changelog.v1.title": "v1.0 is in App Store Developer review",
-      "changelog.v1.body": "OmniSift is preparing its first iOS release. The first version focuses on Share Extension capture, clipboard-assisted collection, AI-powered knowledge cards, local card storage, a star-map view, and a knowledge compass.",
+      "changelog.v1.title": "v1.0 is live on the App Store",
+      "changelog.v1.body": "OmniSift v1.0 is now available as a free iOS download on the App Store. The first version focuses on Share Extension capture, clipboard-assisted collection, AI-powered knowledge cards, local card storage, a star-map view, and a knowledge compass.",
       "changelog.v1.capture": "Capture text, links, articles, screenshots, copied images, and copied Xiaohongshu links with confirmation.",
       "changelog.v1.ai": "Generate card titles, summaries, highlights, tags, entities, semantic relations, and readable Markdown originals when source text is available.",
       "changelog.v1.graph": "Browse saved cards, related insights, topic constellations, star maps, and compass guidance.",
-      "changelog.v1.pricing": "Free plan: 5 AI processing uses per day. Pro: 50 uses per day at ¥12/month or ¥68/year.",
+      "changelog.v1.pricing": "Free plan: 5 AI processing uses per day. Pro is designed for 50 uses per day with first-release pricing planned at ¥12/month or ¥68/year when available through App Store subscriptions.",
 
       "privacy.h1": "1. Introduction",
       "privacy.h2": "2. Data We Collect",
@@ -150,14 +150,14 @@
       "nav.compare": "对比",
       "nav.faq": "常见问题",
       "nav.privacy": "隐私",
-      "nav.launch": "上线提醒",
+      "nav.launch": "下载",
       "footer.tagline": "收集想法，点亮你的知识星图。",
       "footer.home": "首页",
       "footer.changelog": "更新记录",
       "footer.contact": "联系",
-      "app.pending": "即将在 App Store 上线",
+      "app.pending": "在 App Store 下载",
       "app.live": "在 App Store 下载",
-      "cta.launch": "获取上线提醒",
+      "cta.launch": "查看使用场景",
       "cta.faq": "查看常见问题",
       "cta.compare": "对比工作流",
 
@@ -196,7 +196,7 @@
       "home.privacy.local.body": "处理后的知识卡片保存在设备本地；文本仅在处理时发送到云端 AI。",
       "home.pricing.kicker": "定价",
       "home.pricing.title": "免费开始，高频收集可升级 Pro。",
-      "home.pricing.lead": "公开价格口径与首发 App Store 元数据保持一致。",
+      "home.pricing.lead": "知漏已作为免费 iOS App 在 App Store 上线。专业版可用性由 App Store 订阅处理。",
       "home.pricing.free": "免费版",
       "home.pricing.pro": "知漏专业版",
 
@@ -260,12 +260,12 @@
       "changelog.kicker": "更新记录",
       "changelog.title": "知漏上线记录。",
       "changelog.lead": "这里记录公开产品更新，方便用户、搜索引擎和 AI 问答引擎理解产品变化。",
-      "changelog.v1.title": "v1.0 正在 App Store Developer 审核中",
-      "changelog.v1.body": "知漏正在准备第一个 iOS 版本。首发版本聚焦分享扩展采集、剪贴板辅助收集、AI 知识卡片、本地存储、星图视图和知识罗盘。",
+      "changelog.v1.title": "v1.0 已在 App Store 上线",
+      "changelog.v1.body": "知漏 v1.0 已作为免费 iOS App 在 App Store 上线。首发版本聚焦分享扩展采集、剪贴板辅助收集、AI 知识卡片、本地存储、星图视图和知识罗盘。",
       "changelog.v1.capture": "通过分享菜单采集文本、链接、文章、截图，也可确认后收集复制图片和小红书链接。",
       "changelog.v1.ai": "使用云端 AI 生成标题、摘要、高亮、标签、实体、语义关系；原文可读时整理为 Markdown。",
       "changelog.v1.graph": "浏览已保存卡片、关联洞察、主题星座、知识星图和罗盘指引。",
-      "changelog.v1.pricing": "免费版每日 5 次 AI 处理。专业版每日 50 次，¥12/月或 ¥68/年。",
+      "changelog.v1.pricing": "免费版每日 5 次 AI 处理。专业版设计为每日 50 次，App Store 订阅可用后首发计划价格为 ¥12/月或 ¥68/年。",
 
       "privacy.h1": "1. 简介",
       "privacy.h2": "2. 我们收集的数据",
@@ -313,7 +313,8 @@
         link.setAttribute("href", config.appStoreUrl);
         link.classList.remove("is-pending");
         link.removeAttribute("aria-disabled");
-        link.textContent = copy[language]["app.live"];
+        var liveKey = link.getAttribute("data-app-store-live-key") || "app.live";
+        link.textContent = copy[language][liveKey] || copy[language]["app.live"];
       } else {
         link.setAttribute("href", "mailto:omnisift.app@gmail.com?subject=OmniSift%20launch%20notice");
         link.classList.add("is-pending");

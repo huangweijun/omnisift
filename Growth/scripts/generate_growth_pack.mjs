@@ -40,7 +40,8 @@ const faq = read("faq.md");
 const releaseNotes = read("release-notes.md");
 const distribution = read("distribution.md");
 
-const launchCta = "Get launch notice: omnisift.app@gmail.com";
+const appStoreUrl = "https://apps.apple.com/us/app/omnisift/id6773056945?uo=4";
+const launchCta = `Download on the App Store: ${appStoreUrl}`;
 const primaryUrl = "https://omnisift.app/";
 
 const angle = {
@@ -236,7 +237,7 @@ writeFile(outDir, "short-video-script.zh.md", `
 旁白：卡片保存在本地。等你需要回顾时，它已经整理好了。
 
 字幕：知漏 OmniSift - iOS 跨应用 AI 知识碎片收集
-CTA：获取上线提醒：omnisift.app@gmail.com
+CTA：在 App Store 下载：${appStoreUrl}
 `);
 
 writeFile(outDir, "appstore-keyword-notes.md", `

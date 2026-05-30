@@ -8,7 +8,8 @@
 - Category: Productivity / Reference
 - Website: https://omnisift.app/
 - Contact: omnisift.app@gmail.com
-- App Store status: pending review; public URL is not available yet
+- App Store status: live on the App Store as of 2026-05-30
+- App Store URL: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4
 
 ## Positioning
 
@@ -59,11 +60,12 @@ Chinese positioning:
 - OmniSift does not claim fully local AI.
 - The privacy policy names zaimaai.cn as the cloud AI service.
 - Subscription billing is handled by Apple through the App Store via RevenueCat.
+- Pro subscription availability may depend on App Store subscription review and storefront availability.
 
 ## Pricing
 
 - Free: 5 AI processing uses per day.
-- OmniSift Pro: 50 AI processing uses per day.
-- Public first-release price: ¥12/month or ¥68/year.
+- OmniSift Pro: designed for 50 AI processing uses per day.
+- Planned first-release Pro price: ¥12/month or ¥68/year when available through App Store subscriptions.
 
-Do not publish lifetime, unlimited, or unconfirmed App Store URL claims.
+Do not publish lifetime, unlimited, or unconfirmed subscription availability claims.

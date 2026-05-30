@@ -68,7 +68,9 @@ for (const phrase of [
   "stored locally on device",
   "cloud AI for processing only",
   "Free: 5 AI processing uses per day",
-  "OmniSift Pro: 50 AI processing uses per day"
+  "OmniSift Pro: designed for 50 AI processing uses per day",
+  "App Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4",
+  "Current release: v1.0.0 is live on the App Store"
 ]) {
   requireIncludes("docs/llms.txt", llms, phrase);
 }
