@@ -1,0 +1,49 @@
+name: Promotion Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      day:
+        description: Launch day to publish, 1-5
+        required: false
+        type: string
+      mode:
+        description: dry-run or webhook
+        required: false
+        default: dry-run
+        type: choice
+        options:
+          - dry-run
+          - webhook
+  schedule:
+    - cron: "30 1 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build or publish promotion queue
+        env:
+          PROMOTION_WEBHOOK_URL: ${{ secrets.PROMOTION_WEBHOOK_URL }}
+          PROMOTION_PUBLISH_MODE: ${{ inputs.mode || vars.PROMOTION_PUBLISH_MODE || 'dry-run' }}
+          PROMOTION_DAY: ${{ inputs.day }}
+          PROMOTION_LAUNCH_START: ${{ vars.PROMOTION_LAUNCH_START || '2026-05-31' }}
+        run: node Growth/scripts/publish_queue.mjs
+
+      - name: Upload promotion outbox
+        uses: actions/upload-artifact@v4
+        with:
+          name: omnisift-promotion-outbox
+          path: Growth/outbox/**

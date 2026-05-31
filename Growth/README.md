@@ -19,6 +19,7 @@ Run from the repository root:
 node Growth/scripts/check_geo_readiness.mjs
 node Growth/scripts/generate_growth_pack.mjs
 node Growth/scripts/weekly_report.mjs
+node Growth/scripts/publish_queue.mjs
 ```
 
 Optional week override:
@@ -33,9 +34,10 @@ node Growth/scripts/weekly_report.mjs 2026-W22
 - `Growth/dist/<week>/`: weekly blog, social, video, and keyword drafts
 - `Growth/dist/geo-readiness-report.md`: technical GEO/SEO check output
 - `Growth/metrics/<week>.md`: manual weekly metrics template
+- `Growth/outbox/day-<n>.md`: promotion posts queued for a launch day
 
 Generated files are ignored by Git by default. The GitHub Actions workflow uploads them as artifacts for review.
 
 ## Operating Rule
 
-This system generates drafts. It does not auto-publish. Review product claims, App Store status, screenshots, and privacy wording before posting anything publicly.
+This system is dry-run by default. To publish automatically, connect a compliant publisher such as Buffer, Make, Zapier, or n8n through `PROMOTION_WEBHOOK_URL`, then set `PROMOTION_PUBLISH_MODE=webhook` in GitHub Actions variables. Do not use browser automation to bypass platform rate limits, bot detection, CAPTCHA, or account safety systems.
