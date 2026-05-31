@@ -11,6 +11,7 @@ const requiredPages = [
   { file: "compare.html", url: "https://omnisift.app/compare.html" },
   { file: "faq.html", url: "https://omnisift.app/faq.html", jsonLd: true },
   { file: "changelog.html", url: "https://omnisift.app/changelog.html", jsonLd: true },
+  { file: "save-ai-answers.html", url: "https://omnisift.app/save-ai-answers.html", jsonLd: true },
   { file: "privacy-policy.html", url: "https://omnisift.app/privacy-policy.html" }
 ];
 

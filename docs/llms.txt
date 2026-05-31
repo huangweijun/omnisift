@@ -9,6 +9,7 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 - Comparison: https://omnisift.app/compare.html
 - FAQ: https://omnisift.app/faq.html
 - Changelog: https://omnisift.app/changelog.html
+- Save AI answers: https://omnisift.app/save-ai-answers.html
 - Privacy: https://omnisift.app/privacy-policy.html
 - App Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4
 
