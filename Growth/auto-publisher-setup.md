@@ -1,6 +1,6 @@
-# OmniSift Auto Publisher Setup
+# OmniSift Make Auto Publisher Setup
 
-Goal: generate launch posts automatically and send them to a compliant publishing tool. Do not use browser automation to disguise automated actions as human activity.
+Goal: generate launch posts automatically and send them to Make for compliant publishing. Do not use browser automation to disguise automated actions as human activity.
 
 ## Architecture
 
@@ -8,9 +8,18 @@ Goal: generate launch posts automatically and send them to a compliant publishin
 Growth/queue/launch-week.json
   -> Growth/scripts/publish_queue.mjs
   -> GitHub Actions: Promotion Publisher
-  -> dry-run artifact OR webhook publisher
-  -> Buffer / Make / Zapier / n8n / official platform API
+  -> dry-run artifact OR Make webhook
+  -> Make router
+  -> Buffer / Reddit / LinkedIn / Notion / draft queues / official platform APIs
 ```
+
+## Recommended Publisher
+
+Use Make first.
+
+Make is the default for OmniSift because it is easier to operate than n8n, cheaper to start than Zapier, and flexible enough to route by `post.channel`.
+
+Use Buffer as a publishing layer behind Make when a social platform is easier to connect through Buffer than directly through Make.
 
 ## Default Safe Mode
 
@@ -32,30 +41,83 @@ Manual GitHub Actions run:
    - `mode`: `dry-run`
 5. Download the `omnisift-promotion-outbox` artifact.
 
-## Webhook Publishing
+## Make Scenario Setup
 
-Use this when you have connected a compliant publisher.
+Create one Make scenario:
 
-Recommended low-friction options:
+```text
+Custom webhook
+  -> Router
+  -> route: post.channel = x
+  -> route: post.channel = threads
+  -> route: post.channel = reddit
+  -> route: post.channel = linkedin
+  -> route: post.channel = jike
+  -> route: post.channel = video-caption
+  -> route: post.channel = producthunt-draft
+  -> route: post.channel = show-hn-draft
+```
 
-- Buffer: connect X, LinkedIn, Threads/Instagram if available; publish via Buffer integration or a Make/Zapier/n8n scenario.
-- Make: create a custom webhook, then route by `post.channel`.
-- Zapier: create a Catch Hook trigger, then route to social posting actions.
-- n8n: create a webhook workflow, then use official integrations or platform APIs.
+Webhook module:
 
-GitHub configuration:
+1. Create a new Make scenario.
+2. Add `Webhooks -> Custom webhook`.
+3. Name it `omnisift-promotion`.
+4. Copy the generated webhook URL.
+5. Click `Run once`.
+6. Trigger a GitHub Actions dry webhook run or local test so Make can detect the payload fields.
+7. Add a `Router` module after the webhook.
+8. Add one route per channel.
 
-1. Add repository secret:
-   - `PROMOTION_WEBHOOK_URL`: webhook URL from Make/Zapier/n8n/Buffer bridge.
-2. Add repository variable:
-   - `PROMOTION_PUBLISH_MODE`: `webhook`
-3. Optional repository variable:
-   - `PROMOTION_LAUNCH_START`: `2026-05-31`
-4. Run workflow manually once with:
-   - `day`: `1`
-   - `mode`: `webhook`
+Recommended channel actions:
 
-Webhook payload shape:
+- `x`: Buffer queue or X module/API.
+- `threads`: Buffer queue if available on the connected Buffer account.
+- `reddit`: Reddit module/API only for communities where posting is allowed; otherwise route to a draft task.
+- `linkedin`: LinkedIn page post or Buffer queue.
+- `jike`: Notion/Google Sheet draft queue.
+- `video-caption`: Notion/Google Sheet task for short video production.
+- `producthunt-draft`: Notion/Google Sheet launch draft.
+- `show-hn-draft`: Notion/Google Sheet launch draft.
+
+If a platform does not provide an official API or approved integration, route the post to a draft task rather than simulating human browser activity.
+
+## GitHub Configuration
+
+Add repository secret:
+
+- `PROMOTION_WEBHOOK_URL`: Make custom webhook URL.
+
+Optional repository secret:
+
+- `PROMOTION_WEBHOOK_API_KEY`: random shared secret for Make webhook verification.
+
+Add repository variable:
+
+- `PROMOTION_PUBLISH_MODE`: `webhook`
+
+Optional repository variable:
+
+- `PROMOTION_LAUNCH_START`: `2026-05-31`
+
+Run workflow manually once with:
+
+- `day`: `1`
+- `mode`: `webhook`
+
+## Optional Make API Key Check
+
+If you set `PROMOTION_WEBHOOK_API_KEY`, add a filter immediately after the webhook:
+
+```text
+Header x-make-apikey equals your secret value
+```
+
+The publisher sends the key in the `x-make-apikey` header.
+
+If the header is missing or wrong, Make should stop the scenario before the router.
+
+## Webhook Payload Shape
 
 ```json
 {
@@ -70,20 +132,6 @@ Webhook payload shape:
   }
 }
 ```
-
-## Channel Routing
-
-Suggested routes:
-
-- `x`: X/Twitter publisher
-- `threads`: Threads publisher
-- `jike`: send to draft inbox or manual approval queue if no official automation exists
-- `linkedin`: LinkedIn page publisher
-- `video-caption`: store as short video caption task
-- `producthunt-draft`: store as launch draft task
-- `show-hn-draft`: store as launch draft task
-
-If a platform does not provide an official API or approved integration, route the post to a draft task rather than simulating human browser activity.
 
 ## Safety Checks
 
@@ -105,4 +153,4 @@ The workflow runs every day at `01:30 UTC`.
 
 Launch day is calculated from `PROMOTION_LAUNCH_START`.
 
-For the first run, keep `PROMOTION_PUBLISH_MODE=dry-run`. After confirming the route works, switch to `webhook`.
+For the first run, keep `PROMOTION_PUBLISH_MODE=dry-run`. After confirming the Make route works, switch to `webhook`.

@@ -7,6 +7,7 @@ const root = process.cwd();
 const queuePath = path.join(root, "Growth", "queue", "launch-week.json");
 const outboxDir = path.join(root, "Growth", "outbox");
 const publishEndpoint = process.env.PROMOTION_WEBHOOK_URL || "";
+const publishApiKey = process.env.PROMOTION_WEBHOOK_API_KEY || "";
 const publishMode = process.env.PROMOTION_PUBLISH_MODE || "dry-run";
 const launchStart = process.env.PROMOTION_LAUNCH_START || "2026-05-31";
 const dayOverride = process.env.PROMOTION_DAY || "";
@@ -77,7 +78,8 @@ async function postToWebhook(post) {
   const response = await fetch(publishEndpoint, {
     method: "POST",
     headers: {
-      "content-type": "application/json"
+      "content-type": "application/json",
+      ...(publishApiKey ? { "x-make-apikey": publishApiKey } : {})
     },
     body: JSON.stringify({
       product: "OmniSift",

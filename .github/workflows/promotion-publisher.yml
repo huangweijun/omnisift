@@ -37,6 +37,7 @@ jobs:
       - name: Build or publish promotion queue
         env:
           PROMOTION_WEBHOOK_URL: ${{ secrets.PROMOTION_WEBHOOK_URL }}
+          PROMOTION_WEBHOOK_API_KEY: ${{ secrets.PROMOTION_WEBHOOK_API_KEY }}
           PROMOTION_PUBLISH_MODE: ${{ inputs.mode || vars.PROMOTION_PUBLISH_MODE || 'dry-run' }}
           PROMOTION_DAY: ${{ inputs.day }}
           PROMOTION_LAUNCH_START: ${{ vars.PROMOTION_LAUNCH_START || '2026-05-31' }}
