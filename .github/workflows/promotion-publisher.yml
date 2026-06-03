@@ -40,6 +40,7 @@ jobs:
           PROMOTION_WEBHOOK_API_KEY: ${{ secrets.PROMOTION_WEBHOOK_API_KEY }}
           PROMOTION_PUBLISH_MODE: ${{ inputs.mode || vars.PROMOTION_PUBLISH_MODE || 'dry-run' }}
           PROMOTION_DAY: ${{ inputs.day }}
+          PROMOTION_CHANNELS: ${{ vars.PROMOTION_CHANNELS }}
           PROMOTION_LAUNCH_START: ${{ vars.PROMOTION_LAUNCH_START || '2026-05-31' }}
         run: node Growth/scripts/publish_queue.mjs
 

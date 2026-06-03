@@ -95,6 +95,7 @@ Optional repository secret:
 Add repository variable:
 
 - `PROMOTION_PUBLISH_MODE`: `webhook`
+- `PROMOTION_CHANNELS`: comma-separated channels that may be sent to the webhook, for example `x`
 
 Optional repository variable:
 
@@ -140,6 +141,9 @@ If the header is missing or wrong, Make should stop the scenario before the rout
 - unlimited usage
 - lifetime pricing
 - fully local AI claims unless explicitly negated
+- X posts over 280 characters
+
+`PROMOTION_CHANNELS` should stay narrow until each Make route is connected to an official platform integration. OmniSift currently uses `x` so unconnected LinkedIn, Product Hunt, Show HN, video, and Chinese-platform drafts remain in the outbox instead of being sent to Make for live publishing.
 
 Keep platform credentials outside Git:
 

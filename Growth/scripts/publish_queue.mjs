@@ -11,6 +11,12 @@ const publishApiKey = process.env.PROMOTION_WEBHOOK_API_KEY || "";
 const publishMode = process.env.PROMOTION_PUBLISH_MODE || "dry-run";
 const launchStart = process.env.PROMOTION_LAUNCH_START || "2026-05-31";
 const dayOverride = process.env.PROMOTION_DAY || "";
+const channelAllowlist = new Set(
+  (process.env.PROMOTION_CHANNELS || "")
+    .split(",")
+    .map((channel) => channel.trim())
+    .filter(Boolean)
+);
 
 function daysSinceStart() {
   if (dayOverride) return Number(dayOverride);
@@ -101,6 +107,9 @@ async function postToWebhook(post) {
 const queue = JSON.parse(fs.readFileSync(queuePath, "utf8"));
 const day = daysSinceStart();
 const posts = queue.filter((post) => post.day === day);
+const publishPosts = channelAllowlist.size
+  ? posts.filter((post) => channelAllowlist.has(post.channel))
+  : posts;
 
 for (const post of posts) assertSafePost(post);
 
@@ -109,10 +118,10 @@ const outboxPath = path.join(outboxDir, `day-${day}.md`);
 fs.writeFileSync(outboxPath, renderMarkdown(day, posts));
 
 if (publishMode === "webhook") {
-  for (const post of posts) {
+  for (const post of publishPosts) {
     await postToWebhook(post);
   }
-  console.log(`Published ${posts.length} posts for day ${day} via webhook.`);
+  console.log(`Published ${publishPosts.length}/${posts.length} posts for day ${day} via webhook.`);
 } else {
   console.log(`Dry-run generated Growth/outbox/day-${day}.md with ${posts.length} posts.`);
 }
