@@ -77,6 +77,17 @@
     "text": "Title: Show HN: OmniSift - capture iOS snippets into AI knowledge cards\n\nI built OmniSift because I kept losing useful fragments from AI answers, articles, chats, and screenshots before they made it into a real note.\n\nIt is an iOS Share Sheet workflow: share text, links, articles, or screenshots, and OmniSift turns the fragment into a structured card with a title, summary, highlights, tags, entities, and relations.\n\nThe product boundary is intentionally narrow. It is not a long-form note editor. It is for capture before organizing.\n\nPrivacy boundary: no account, no analytics tracking, cards stored locally on device. Shared text is sent to cloud AI for processing only.\n\nWebsite: https://omnisift.app/\nApp Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
   },
   {
+    "id": "launch-day5-reddit-feedback",
+    "day": 5,
+    "channel": "reddit",
+    "language": "en",
+    "redditMode": "draft",
+    "kind": "self",
+    "subreddit": "",
+    "title": "I built an iOS Share Sheet app for turning useful snippets into structured knowledge cards",
+    "text": "I built OmniSift because I kept losing useful fragments from AI answers, articles, chats, and screenshots before they made it into a real note.\n\nThe app is intentionally narrow: share text, links, articles, or screenshots from another iOS app, and it turns the fragment into a structured card with a title, summary, highlights, tags, named entities, and relations.\n\nPrivacy boundary: no account, no analytics tracking, cards stored locally on device. Shared text is sent to cloud AI for processing only.\n\nI am looking for feedback from people who save research snippets or AI answers on iPhone. Is this capture-before-organizing workflow useful, or would you expect it to live inside a larger notes app?\n\nWebsite: https://omnisift.app/\nApp Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
+  },
+  {
     "id": "launch-day5-x-why-built",
     "day": 5,
     "channel": "x",

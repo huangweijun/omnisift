@@ -31,6 +31,24 @@ function assertSafePost(post) {
     throw new Error(`Blocked overlong X post in ${post.id}: ${[...post.text].length}/280`);
   }
 
+  if (post.channel === "reddit") {
+    if (!post.title) {
+      throw new Error(`Blocked Reddit post without title in ${post.id}`);
+    }
+
+    if ([...post.title].length > 300) {
+      throw new Error(`Blocked overlong Reddit title in ${post.id}: ${[...post.title].length}/300`);
+    }
+
+    if (post.redditMode !== "draft" && process.env.PROMOTION_ALLOW_LIVE_REDDIT !== "true") {
+      throw new Error(`Blocked live Reddit publishing for ${post.id}; set PROMOTION_ALLOW_LIVE_REDDIT=true only after subreddit rules are confirmed`);
+    }
+
+    if (post.redditMode !== "draft" && !post.subreddit) {
+      throw new Error(`Blocked live Reddit publishing without subreddit in ${post.id}`);
+    }
+  }
+
   const blocked = [
     /unlimited/i,
     /lifetime/i,
@@ -71,6 +89,9 @@ function renderMarkdown(day, posts) {
       "",
       `- Channel: ${post.channel}`,
       `- Language: ${post.language}`,
+      ...(post.title ? [`- Title: ${post.title}`] : []),
+      ...(post.redditMode ? [`- Reddit mode: ${post.redditMode}`] : []),
+      ...(post.subreddit ? [`- Subreddit: ${post.subreddit}`] : []),
       "",
       "```text",
       post.text,

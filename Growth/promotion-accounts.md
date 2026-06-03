@@ -40,7 +40,7 @@ This file tracks promotion accounts and publishing readiness. Do not store passw
 | X | https://x.com/ | `@omnisift` or `@omnisiftapp` | Not registered | AI/productivity audience, indie launch updates | Day 1 X draft |
 | Threads | https://www.threads.net/ | `@omnisift` or `@omnisiftapp` | Not registered | Republish short launch posts | Day 1 X draft adapted |
 | LinkedIn Page | https://www.linkedin.com/company/setup/new/ | OmniSift | Not registered | Work-focused positioning and credibility | Day 4 LinkedIn draft |
-| Reddit | https://www.reddit.com/ | `u/omnisift` or product account | Not registered | Careful community participation | Comment/help first; avoid spam |
+| Reddit | https://www.reddit.com/ | `u/omnisift` or product account | Logged in in browser; profile/handle not recorded | Careful community participation | Draft route first; choose subreddit before live posts |
 | Hacker News | https://news.ycombinator.com/ | `omnisift` or founder account | Not registered | Show HN launch | Day 5 Show HN draft |
 | Indie Hackers | https://www.indiehackers.com/ | OmniSift / founder | Not registered | Build-in-public launch note | Day 1/Day 5 mix |
 
