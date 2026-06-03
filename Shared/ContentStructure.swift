@@ -55,6 +55,52 @@ enum ContentStructure {
         return text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    static func cleanSummaryText(_ value: String?) -> String? {
+        guard let text = cleanDisplayText(value) else { return nil }
+        let lowered = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let emptyMarkers = ["null", "nil", "none", "n/a", "na", "无", "暂无"]
+        guard !emptyMarkers.contains(lowered) else { return nil }
+        return text
+    }
+
+    static func fallbackSummaryMarkdown(
+        title: String?,
+        highlight: String?,
+        body: String,
+        sourceURLString: String?,
+        language: OutputLanguage
+    ) -> String? {
+        guard let cleanedBody = cleanDisplayText(body),
+              !isPlaceholderSummarySource(cleanedBody, title: title, sourceURLString: sourceURLString) else {
+            return nil
+        }
+
+        let snippets = summarySnippets(
+            from: cleanedBody,
+            excluding: [title, highlight].compactMap(cleanDisplayText)
+        )
+        guard !snippets.isEmpty else { return nil }
+
+        let cleanedTitle = cleanDisplayText(title)
+        let intro: String
+        switch language {
+        case .simplifiedChinese:
+            if let cleanedTitle {
+                intro = "围绕 **\(cleanedTitle)**，这条内容保留了以下要点："
+            } else {
+                intro = "这条内容保留了以下要点："
+            }
+        case .english:
+            if let cleanedTitle {
+                intro = "For **\(cleanedTitle)**, this capture keeps these key points:"
+            } else {
+                intro = "This capture keeps these key points:"
+            }
+        }
+
+        return ([intro] + snippets.map { "- \($0)" }).joined(separator: "\n")
+    }
+
     static func recoverAIFields(from text: String) -> String? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.hasPrefix("{"), trimmed.contains("\"title\"") else {
@@ -187,6 +233,107 @@ enum ContentStructure {
             .split(separator: "|", omittingEmptySubsequences: false)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty && !$0.allSatisfy { $0 == "-" } }
+    }
+
+    private static func isPlaceholderSummarySource(
+        _ text: String,
+        title: String?,
+        sourceURLString: String?
+    ) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lowered = trimmed.lowercased()
+        let placeholderMarkers = [
+            "image captured for ocr",
+            "已采集图片，等待文字识别",
+            "could not extract",
+            "无法读取",
+            "blocked page",
+            "unreadable"
+        ]
+        if placeholderMarkers.contains(where: { lowered == $0 || lowered.contains($0) }) {
+            return true
+        }
+
+        if isLikelyURLOnly(trimmed) {
+            return true
+        }
+
+        guard trimmed.contains("://") || trimmed.contains("www.") else {
+            return false
+        }
+
+        var withoutURLs = trimmed.replacingOccurrences(
+            of: #"https?://\S+|www\.\S+"#,
+            with: "",
+            options: .regularExpression
+        )
+        if let sourceURLString {
+            withoutURLs = withoutURLs.replacingOccurrences(of: sourceURLString, with: "")
+        }
+        if let title = cleanDisplayText(title) {
+            withoutURLs = withoutURLs.replacingOccurrences(of: title, with: "")
+        }
+
+        return withoutURLs
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .count < 20
+    }
+
+    private static func summarySnippets(from body: String, excluding excludedValues: [String]) -> [String] {
+        var seen = Set<String>()
+        let excluded = Set(excludedValues.map { $0.normalizedKnowledgeKey })
+
+        return body
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .components(separatedBy: .newlines)
+            .flatMap(splitSummaryLine)
+            .compactMap { raw -> String? in
+                let cleaned = cleanSummaryCandidate(raw)
+                guard cleaned.count >= 18,
+                      !isLikelyURLOnly(cleaned),
+                      !excluded.contains(cleaned.normalizedKnowledgeKey) else {
+                    return nil
+                }
+
+                let key = cleaned.normalizedKnowledgeKey
+                guard !seen.contains(key) else { return nil }
+                seen.insert(key)
+                return String(cleaned.prefix(180))
+            }
+            .prefix(3)
+            .map { $0 }
+    }
+
+    private static func splitSummaryLine(_ line: String) -> [String] {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count > 180 else { return [trimmed] }
+
+        return trimmed
+            .components(separatedBy: CharacterSet(charactersIn: "。！？!?；;"))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+
+    private static func cleanSummaryCandidate(_ value: String) -> String {
+        value
+            .replacingOccurrences(of: #"^\s{0,3}#{1,6}\s*"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"^\s*[-*•]\s*"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"^\s*\d+[.)]\s*"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"^\s*>\s*"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func isLikelyURLOnly(_ value: String) -> Bool {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return true }
+        if URL(string: trimmed)?.scheme?.hasPrefix("http") == true {
+            return true
+        }
+        let withoutURLs = trimmed
+            .replacingOccurrences(of: #"https?://\S+|www\.\S+"#, with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return withoutURLs.isEmpty
     }
 
     private static func firstJSONStringValue(named key: String, in text: String) -> String? {

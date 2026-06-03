@@ -1,0 +1,22 @@
+{
+  "name": "omnisift-promo-video",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render OmniSiftPromo out/omnisift-promo-30s.mp4",
+    "render:still": "remotion still OmniSiftPromo out/poster.png --frame=885"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.376",
+    "@remotion/media": "^4.0.376",
+    "remotion": "^4.0.376",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}

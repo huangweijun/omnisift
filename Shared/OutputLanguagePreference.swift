@@ -66,6 +66,27 @@ enum OutputLanguage {
         case .english: "OmniSift saved the original link and automatically tried HTTP fetch plus in-app browser rendering, but the page still did not return readable text."
         }
     }
+
+    var unreadableImageTitle: String {
+        switch self {
+        case .simplifiedChinese: "已保存图片，未识别到文字"
+        case .english: "Image Saved Without Readable Text"
+        }
+    }
+
+    var unreadableImageHighlight: String {
+        switch self {
+        case .simplifiedChinese: "这张图片已保留，但 OCR 没有识别到足够清晰的文字。可以打开原图查看，或换一张更清晰的截图再试。"
+        case .english: "The image was saved, but OCR did not find clear readable text. You can review the image or retry with a clearer screenshot."
+        }
+    }
+
+    var unreadableImageSummary: String {
+        switch self {
+        case .simplifiedChinese: "知漏已保留原始图片。由于图片中文字过小、模糊、旋转、压缩或对比度不足，当前没有生成结构化摘要。"
+        case .english: "OmniSift kept the original image. No structured summary was generated because the text may be too small, blurred, rotated, compressed, or low contrast."
+        }
+    }
 }
 
 enum UserDefaultsKeys {

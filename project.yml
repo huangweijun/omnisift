@@ -51,7 +51,7 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "2"
+        CURRENT_PROJECT_VERSION: "3"
     entitlements:
       path: OmniSift/OmniSift.entitlements
       properties:
@@ -63,8 +63,6 @@ targets:
         codeSign: true
       - package: RevenueCat
         product: RevenueCat
-      - package: RevenueCat
-        product: RevenueCatUI
 
   ShareExtension:
     type: app-extension
@@ -82,7 +80,7 @@ targets:
         INFOPLIST_FILE: ShareExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: ShareExtension/ShareExtension.entitlements
         MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "2"
+        CURRENT_PROJECT_VERSION: "3"
     entitlements:
       path: ShareExtension/ShareExtension.entitlements
       properties:

@@ -64,3 +64,4 @@ Growth/app-launch-growth-playbook.md
 # Screenshots from research
 *.png
 !OmniSift/Resources/Assets.xcassets/**/*.png
+!PromoVideo/public/app-icon.png

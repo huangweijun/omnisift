@@ -96,11 +96,19 @@ class AIProcessingService {
     private func processCard(_ card: InsightCard) async {
         do {
             await extractImageTextIfNeeded(for: card)
+            inferSourceURLIfNeeded(for: card)
             if card.contentType == .image, card.extractionStatus == .failed {
-                card.status = .failed
-                card.errorMessage = card.extractionError
+                if card.rawTextIsOnlyImagePlaceholder {
+                    applyLocalUnreadableImageSummary(to: card)
+                    upsertTopics(for: card)
+                    linkRelatedCards(for: card)
+                } else {
+                    card.extractionStatus = .partialText
+                }
                 try? modelContext?.save()
-                return
+                if card.status == .processed {
+                    return
+                }
             }
 
             await extractSourceContentIfNeeded(for: card)
@@ -117,10 +125,18 @@ class AIProcessingService {
                 body: card.rawText
             )
             let result = try await cloudService.process(rawText: processingInput)
+            let summary = ContentStructure.cleanSummaryText(result.summary)
+            ?? ContentStructure.fallbackSummaryMarkdown(
+                title: result.title,
+                highlight: result.highlight,
+                body: card.rawText,
+                sourceURLString: card.sourceURLString,
+                language: OutputLanguagePreference.stored.resolvedLanguage
+            )
 
             card.title = result.title
             card.highlight = result.highlight
-            card.summary = result.summary
+            card.summary = summary
             card.tags = result.tags
             card.topicNames = result.topics.isEmpty ? result.tags : result.topics
             card.keywordNames = result.keywords
@@ -221,12 +237,11 @@ class AIProcessingService {
 
     private func extractSourceContentIfNeeded(for card: InsightCard) async {
         guard let sourceURL = card.sourceURL else { return }
-        guard card.extractionStatus == .urlOnly ||
-              card.extractionStatus == .partialText ||
-              card.extractionStatus == .failed else {
+        guard shouldExtractSourceContent(for: card) else {
             return
         }
 
+        let existingRawText = card.rawText
         card.extractionStatus = .pending
         card.extractionError = nil
         try? modelContext?.save()
@@ -239,12 +254,28 @@ class AIProcessingService {
         )
 
         if result.status == .failed {
-            card.extractionStatus = .failed
+            if existingRawText.hasMeaningfulCapturedText {
+                card.rawText = existingRawText
+                card.extractionStatus = .partialText
+            } else {
+                card.extractionStatus = .failed
+            }
             card.extractionError = result.errorMessage
             return
         }
 
         applyURLExtractionResult(result, to: card)
+    }
+
+    private func shouldExtractSourceContent(for card: InsightCard) -> Bool {
+        switch card.extractionStatus {
+        case .urlOnly, .partialText, .failed:
+            return true
+        case .fullText:
+            return card.hasDiscoveredSourceURL && card.rawTextLooksLikeShareWrapper
+        case .notNeeded, .pending:
+            return false
+        }
     }
 
     private func applyURLExtractionResult(
@@ -322,7 +353,7 @@ class AIProcessingService {
     private func applyLocalInaccessibleLinkSummaryIfNeeded(to card: InsightCard) -> Bool {
         guard card.extractionStatus == .failed,
               card.sourceURL != nil,
-              card.rawText.count < 500 else {
+              !card.rawText.hasMeaningfulCapturedText else {
             return false
         }
 
@@ -343,6 +374,39 @@ class AIProcessingService {
         return true
     }
 
+    private func inferSourceURLIfNeeded(for card: InsightCard) {
+        guard card.sourceURL == nil,
+              let url = SourceURLValidator.firstValidatedWebURL(in: card.rawText) else {
+            return
+        }
+
+        card.sourceURLString = url.absoluteString
+        card.contentType = card.contentType == .image ? .image : .url
+        if card.sourceApp == nil || card.sourceApp == "Unknown" {
+            card.sourceApp = inferSourceApp(from: url)
+        }
+        if card.extractionStatus == .notNeeded || card.extractionStatus == .fullText {
+            card.extractionStatus = .partialText
+        }
+    }
+
+    private func applyLocalUnreadableImageSummary(to card: InsightCard) {
+        let language = OutputLanguagePreference.stored.resolvedLanguage
+        card.title = card.sourceTitle ?? language.unreadableImageTitle
+        card.highlight = language.unreadableImageHighlight
+        card.summary = language.unreadableImageSummary
+        card.tags = localizedFallbackLabels(for: language, english: ["Image", "OCR"])
+        card.topicNames = localizedFallbackLabels(for: language, english: ["Image Captures"])
+        card.keywordNames = localizedFallbackLabels(for: language, english: ["Unreadable Image", "OCR"])
+        card.entityNames = []
+        card.relationSummaries = []
+        card.formattedOriginalMarkdown = nil
+        card.confidence = 0.15
+        card.status = .processed
+        card.processedAt = Date()
+        card.errorMessage = nil
+    }
+
     private func localizedFallbackLabels(for language: OutputLanguage, english: [String]) -> [String] {
         guard language == .simplifiedChinese else {
             return english
@@ -355,6 +419,10 @@ class AIProcessingService {
             case "Saved Links": "已保存链接"
             case "Blocked Page": "受限页面"
             case "Shared Link": "分享链接"
+            case "Image": "图片"
+            case "OCR": "文字识别"
+            case "Image Captures": "图片采集"
+            case "Unreadable Image": "不可读图片"
             default: label
             }
         }
@@ -519,6 +587,94 @@ class AIProcessingService {
         return (first.topicNames + first.tags + first.keywordNames + first.entityNames)
             .filter { secondKeys.contains($0.normalizedKnowledgeKey) }
             .cleanedKnowledgeLabels(limit: 3)
+    }
+}
+
+private extension InsightCard {
+    var hasDiscoveredSourceURL: Bool {
+        guard let sourceURLString else { return false }
+        return rawText.localizedCaseInsensitiveContains(sourceURLString) ||
+            SourceURLValidator.firstValidatedWebURL(in: rawText)?.absoluteString == sourceURLString
+    }
+
+    var rawTextLooksLikeShareWrapper: Bool {
+        let cleaned = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else { return false }
+
+        let lowered = cleaned.lowercased()
+        let wrapperMarkers = [
+            "打开 app",
+            "app内打开",
+            "app 内打开",
+            "复制链接",
+            "复制这条信息",
+            "打开小红书",
+            "xhslink.com",
+            "xiaohongshu.com",
+            "read more",
+            "open app",
+            "open in app",
+            "copy link"
+        ]
+        if wrapperMarkers.contains(where: { lowered.contains($0) }) {
+            return true
+        }
+
+        guard SourceURLValidator.firstValidatedWebURL(in: cleaned) != nil else {
+            return false
+        }
+        return cleaned.count < 1200
+    }
+
+    var rawTextIsOnlyImagePlaceholder: Bool {
+        let cleanedRawText = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedRawText.isEmpty else { return true }
+
+        let placeholderValues = [
+            AppStrings(rawPreferenceValue: OutputLanguagePreference.english.rawValue).imageCapturedForOCR,
+            AppStrings(rawPreferenceValue: OutputLanguagePreference.simplifiedChinese.rawValue).imageCapturedForOCR
+        ]
+
+        return placeholderValues.contains(cleanedRawText)
+    }
+}
+
+private extension String {
+    var hasMeaningfulCapturedText: Bool {
+        let cleaned = trimmingCharacters(in: .whitespacesAndNewlines)
+        guard cleaned.count >= 80 else { return false }
+
+        var withoutURLs = cleaned.replacingOccurrences(
+            of: #"(?i)\b(?:https?://|www\.)[^\s<>"']+"#,
+            with: "",
+            options: .regularExpression
+        )
+
+        let noiseMarkers = [
+            "打开 APP",
+            "APP内打开",
+            "APP 内打开",
+            "复制链接",
+            "复制这条信息",
+            "打开小红书",
+            "Open App",
+            "Open in app",
+            "Copy link"
+        ]
+        for marker in noiseMarkers {
+            withoutURLs = withoutURLs.replacingOccurrences(
+                of: marker,
+                with: "",
+                options: [.caseInsensitive, .diacriticInsensitive]
+            )
+        }
+
+        let compact = withoutURLs.replacingOccurrences(
+            of: #"[^\p{L}\p{N}]"#,
+            with: "",
+            options: .regularExpression
+        )
+        return compact.count >= 30
     }
 }
 

@@ -10,6 +10,21 @@ struct SourceURLValidator {
         return validatedWebURL(url)
     }
 
+    static func firstValidatedWebURL(in text: String?) -> URL? {
+        guard let text,
+              !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return nil
+        }
+
+        for candidate in detectedURLStrings(in: text) {
+            if let url = validatedDetectedURLString(candidate) {
+                return url
+            }
+        }
+
+        return nil
+    }
+
     static func validatedWebURL(_ url: URL) -> URL? {
         guard let scheme = url.scheme?.lowercased(),
               scheme == "http" || scheme == "https",
@@ -33,7 +48,8 @@ struct SourceURLValidator {
         if normalizedHost.contains(":") {
             return isPublicIPv6Host(normalizedHost)
         }
-        if normalizedHost.contains("x") {
+        if normalizedHost.hasPrefix("0x"),
+           normalizedHost.dropFirst(2).allSatisfy(\.isHexDigit) {
             return false
         }
         if normalizedHost.allSatisfy({ $0.isNumber || $0 == "." }) {
@@ -76,5 +92,58 @@ struct SourceURLValidator {
             return isPublicIPv4Host(mappedIPv4)
         }
         return true
+    }
+
+    private static func detectedURLStrings(in text: String) -> [String] {
+        var results: [String] = []
+        if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
+            let range = NSRange(text.startIndex..<text.endIndex, in: text)
+            for match in detector.matches(in: text, options: [], range: range) {
+                if let url = match.url?.absoluteString {
+                    results.append(url)
+                }
+                if let textRange = Range(match.range, in: text) {
+                    results.append(String(text[textRange]))
+                }
+            }
+        }
+
+        let pattern = #"(?i)\b(?:https?://|www\.)[^\s<>"']+"#
+        if let regex = try? NSRegularExpression(pattern: pattern) {
+            let range = NSRange(text.startIndex..<text.endIndex, in: text)
+            for match in regex.matches(in: text, range: range) {
+                if let textRange = Range(match.range, in: text) {
+                    results.append(String(text[textRange]))
+                }
+            }
+        }
+
+        var seen = Set<String>()
+        return results.compactMap { raw in
+            let cleaned = cleanDetectedURLString(raw)
+            guard !cleaned.isEmpty else { return nil }
+            let key = cleaned.lowercased()
+            guard !seen.contains(key) else { return nil }
+            seen.insert(key)
+            return cleaned
+        }
+    }
+
+    private static func validatedDetectedURLString(_ raw: String) -> URL? {
+        var cleaned = cleanDetectedURLString(raw)
+        if cleaned.lowercased().hasPrefix("www.") {
+            cleaned = "https://\(cleaned)"
+        }
+        return validatedWebURL(from: cleaned)
+    }
+
+    private static func cleanDetectedURLString(_ raw: String) -> String {
+        var cleaned = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trailingTerminators = CharacterSet(charactersIn: ".,;:!?)\"]}'")
+        while let scalar = cleaned.unicodeScalars.last,
+              trailingTerminators.contains(scalar) {
+            cleaned.removeLast()
+        }
+        return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

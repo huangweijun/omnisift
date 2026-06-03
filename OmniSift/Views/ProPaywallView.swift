@@ -5,6 +5,9 @@ import RevenueCat
 
 /// Paywall screen presented when user hits free-tier limit or taps "Upgrade".
 struct ProPaywallView: View {
+    private static let privacyPolicyURL = URL(string: "https://omnisift.app/privacy-policy.html")!
+    private static let termsOfUseURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+
     @Environment(\.dismiss) private var dismiss
     @Environment(SubscriptionService.self) private var subscriptionService
     @AppStorage(UserDefaultsKeys.outputLanguagePreference, store: UserDefaults(suiteName: appGroupID))
@@ -169,11 +172,22 @@ struct ProPaywallView: View {
 
                 Spacer(minLength: 8)
 
-                Text(strings.purchasePrivacyNote)
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .multilineTextAlignment(.trailing)
-                    .lineLimit(2)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(strings.purchasePrivacyNote)
+                        .foregroundStyle(.tertiary)
+
+                    HStack(spacing: 8) {
+                        Link(strings.privacyPolicy, destination: Self.privacyPolicyURL)
+                        Text("|")
+                            .foregroundStyle(.tertiary)
+                        Link(strings.termsOfUse, destination: Self.termsOfUseURL)
+                    }
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+                }
+                .font(.caption2)
+                .multilineTextAlignment(.trailing)
             }
         }
         .padding(.horizontal, 20)
@@ -263,7 +277,6 @@ struct ProPaywallView: View {
         guard Purchases.isConfigured else {
             packages = []
             selectedPackageIdentifier = nil
-            errorMessage = strings.storeUnavailable
             return
         }
 
@@ -283,7 +296,6 @@ struct ProPaywallView: View {
         } catch {
             packages = []
             selectedPackageIdentifier = nil
-            errorMessage = strings.loadPlansFailed
         }
         #endif
     }

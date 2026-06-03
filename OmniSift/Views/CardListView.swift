@@ -274,7 +274,7 @@ struct CardRow: View {
             if card.status == .failed {
                 VStack(alignment: .leading, spacing: 8) {
                     if let error = card.errorMessage {
-                        Text(error)
+                        Text(strings.localizedExtractionError(error))
                             .font(.caption)
                             .foregroundStyle(.red)
                             .lineLimit(2)

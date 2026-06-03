@@ -92,6 +92,7 @@ actor CloudAIService {
         case apiError(Int, String)
         case parseError(String)
         case rateLimited
+        case missingAppSecret
         case unauthorized
 
         var errorDescription: String? {
@@ -100,7 +101,8 @@ actor CloudAIService {
             case .apiError(let code, let msg): return "API(\(code)): \(msg.prefix(120))"
             case .parseError(let detail): return "Parse failed: \(detail.prefix(80))"
             case .rateLimited: return "Rate limited. Try again later."
-            case .unauthorized: return "Cloud service unauthorized."
+            case .missingAppSecret: return "Cloud service app secret is not configured."
+            case .unauthorized: return "Cloud service rejected authorization."
             }
         }
     }
@@ -171,7 +173,7 @@ actor CloudAIService {
 
     private func sendMessage(system: String, userContent: String, maxTokens: Int) async throws -> String {
         guard let appSecret else {
-            throw CloudAIError.unauthorized
+            throw CloudAIError.missingAppSecret
         }
 
         let requestBody: [String: Any] = [

@@ -32,8 +32,14 @@ struct CardDetailView: View {
     }
 
     private var displaySummary: String? {
-        guard let summary = card.summary else { return nil }
-        return ContentStructure.cleanDisplayText(summary) ?? summary
+        ContentStructure.cleanSummaryText(card.summary)
+        ?? ContentStructure.fallbackSummaryMarkdown(
+            title: displayTitle,
+            highlight: displayHighlight,
+            body: card.rawText,
+            sourceURLString: card.sourceURLString,
+            language: strings.language
+        )
     }
 
     private var readableOriginalMarkdown: String? {
@@ -550,7 +556,7 @@ struct CardDetailView: View {
                         Rectangle().fill(Color.blue).frame(width: 3)
                     }
             }
-            if let summary = card.summary {
+            if let summary = displaySummary {
                 Text(summary)
                     .font(.callout)
             }

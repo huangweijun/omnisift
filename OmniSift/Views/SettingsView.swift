@@ -165,7 +165,7 @@ struct SettingsView: View {
                             .foregroundStyle(.orange)
                     }
 
-                    Link(destination: URL(string: "https://huangweijun.github.io/omnisift/privacy-policy.html")!) {
+                    Link(destination: URL(string: "https://omnisift.app/privacy-policy.html")!) {
                         Label(strings.privacyPolicy, systemImage: "hand.raised.fill")
                     }
                 }

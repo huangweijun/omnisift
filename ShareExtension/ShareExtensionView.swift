@@ -27,122 +27,299 @@ struct ShareExtensionView: View {
 
     var body: some View {
         ZStack {
-            // Semi-transparent background
-            Color.black.opacity(0.3)
+            ShareConstellationBackdrop()
                 .ignoresSafeArea()
                 .onTapGesture { cancelAndDismiss() }
 
-            // Bottom sheet
             VStack(spacing: 0) {
                 Spacer()
-
-                VStack(spacing: 16) {
-                    // Handle bar
-                    Capsule()
-                        .fill(.secondary.opacity(0.4))
-                        .frame(width: 36, height: 5)
-                        .padding(.top, 8)
-
-                    // Header
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(strings.shareSaveToApp)
-                                .font(.headline)
-                            Text(strings.shareWillCleanLater)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Button(strings.cancel) { cancelAndDismiss() }
-                            .font(.subheadline)
-                    }
-                    .padding(.horizontal, 20)
-
-                    // Content preview
-                    if isLoading {
-                        ProgressView(strings.extractingContent)
-                            .frame(height: 100)
-                    } else {
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 8) {
-                                if let sourceTitle, !sourceTitle.isEmpty {
-                                    Text(sourceTitle)
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(.primary)
-                                }
-                                if let sourceURLString {
-                                    Label(sourceURLString, systemImage: "link")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(2)
-                                }
-                                if contentType == .image {
-                                    Label(strings.imageSavedForOCR, systemImage: "photo")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Text(extractedText)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(8)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .frame(maxHeight: 120)
-                        .padding(.horizontal, 20)
-                        .padding(12)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                        .padding(.horizontal, 20)
-                    }
-
-                    // Usage info
-                    HStack {
-                        Image(systemName: "sparkles")
-                            .foregroundStyle(.tint)
-                        Text(strings.freeUsesRemaining(DailyUsageTracker.remainingFreeUses))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.horizontal, 20)
-
-                    if let saveErrorMessage {
-                        Label(saveErrorMessage, systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                            .padding(.horizontal, 20)
-                    }
-
-                    // Save button
-                    Button {
-                        Task { await saveAndDismiss() }
-                    } label: {
-                        HStack {
-                            if isSaving {
-                                ProgressView()
-                                    .tint(.white)
-                            } else {
-                                Image(systemName: "square.and.arrow.down")
-                            }
-                            Text(isSaving ? strings.saving : strings.save)
-                        }
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 14))
-                    }
-                    .disabled(extractedText.isEmpty || isSaving)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
-                }
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24))
-                .padding(.horizontal, 8)
-                .padding(.bottom, 8)
+                capturePanel
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 8)
             }
         }
+        .preferredColorScheme(.dark)
         .task {
             await extractContent()
         }
+    }
+
+    private var capturePanel: some View {
+        VStack(spacing: 18) {
+            Capsule()
+                .fill(.white.opacity(0.22))
+                .frame(width: 42, height: 5)
+                .padding(.top, 10)
+
+            header
+                .padding(.horizontal, 20)
+
+            contentPreview
+                .padding(.horizontal, 20)
+
+            usageRow
+                .padding(.horizontal, 20)
+
+            if let saveErrorMessage {
+                Label(saveErrorMessage, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Color(red: 1.0, green: 0.44, blue: 0.36))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+            }
+
+            saveButton
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+        }
+        .background {
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.02, green: 0.06, blue: 0.10).opacity(0.98),
+                            Color(red: 0.02, green: 0.16, blue: 0.18).opacity(0.96),
+                            Color(red: 0.10, green: 0.08, blue: 0.05).opacity(0.94)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            .white.opacity(0.22),
+                            Color(red: 0.21, green: 0.82, blue: 0.74).opacity(0.30),
+                            Color(red: 1.0, green: 0.75, blue: 0.28).opacity(0.20)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        }
+        .shadow(color: .black.opacity(0.42), radius: 28, x: 0, y: -10)
+    }
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.16, green: 0.74, blue: 0.66),
+                                Color(red: 0.97, green: 0.69, blue: 0.24)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                Image(systemName: "sparkles")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+            }
+            .frame(width: 44, height: 44)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(strings.shareSaveToApp)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+                Text(strings.shareWillCleanLater)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.62))
+                    .lineLimit(2)
+            }
+
+            Spacer(minLength: 8)
+
+            Button {
+                cancelAndDismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white.opacity(0.78))
+                    .frame(width: 34, height: 34)
+                    .background(.white.opacity(0.10), in: Circle())
+            }
+            .accessibilityLabel(strings.cancel)
+        }
+    }
+
+    private var contentPreview: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Image(systemName: previewIconName)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color(red: 0.40, green: 0.78, blue: 1.0))
+                    .frame(width: 28, height: 28)
+                    .background(Color.white.opacity(0.08), in: Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(strings.shareIncomingSignal)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.86))
+                    Text(previewStatusText)
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.48))
+                }
+
+                Spacer()
+                ShareStatusPill(text: statusText)
+            }
+
+            if isLoading {
+                HStack(spacing: 10) {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(.white)
+                    Text(strings.extractingContent)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.72))
+                }
+                .frame(maxWidth: .infinity, minHeight: 102, alignment: .center)
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        if let sourceTitle = clean(sourceTitle) {
+                            Text(sourceTitle)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .lineLimit(2)
+                        }
+
+                        if let sourceURLString = clean(sourceURLString) {
+                            Label {
+                                Text(sourceURLString)
+                                    .lineLimit(2)
+                            } icon: {
+                                Image(systemName: "link")
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.52))
+                        }
+
+                        if contentType == .image {
+                            Label(strings.imageSavedForOCR, systemImage: "photo")
+                                .font(.caption)
+                                .foregroundStyle(Color(red: 0.95, green: 0.72, blue: 0.30))
+                        }
+
+                        Text(previewText)
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.70))
+                            .lineLimit(8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 138)
+            }
+        }
+        .padding(16)
+        .background {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(Color.white.opacity(0.065))
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+        }
+    }
+
+    private var usageRow: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "sparkle.magnifyingglass")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color(red: 0.97, green: 0.70, blue: 0.24))
+            Text(strings.freeUsesRemaining(DailyUsageTracker.remainingFreeUses))
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.white.opacity(0.62))
+            Spacer()
+        }
+    }
+
+    private var saveButton: some View {
+        Button {
+            Task { await saveAndDismiss() }
+        } label: {
+            HStack(spacing: 10) {
+                if isSaving {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(.white)
+                } else {
+                    Image(systemName: "sparkles.rectangle.stack.fill")
+                }
+                Text(isSaving ? strings.saving : strings.save)
+            }
+            .font(.headline.weight(.bold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 15)
+            .background(saveButtonBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(.white.opacity(canSave ? 0.18 : 0.04), lineWidth: 1)
+            }
+        }
+        .disabled(!canSave)
+        .opacity(canSave ? 1 : 0.48)
+    }
+
+    private var saveButtonBackground: some ShapeStyle {
+        LinearGradient(
+            colors: canSave
+            ? [Color(red: 0.12, green: 0.66, blue: 0.60), Color(red: 0.14, green: 0.38, blue: 0.72)]
+            : [Color.white.opacity(0.12), Color.white.opacity(0.08)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private var canSave: Bool {
+        !extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isSaving && !isLoading
+    }
+
+    private var previewText: String {
+        let text = extractedText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return strings.shareNoReadablePreview }
+        return text
+    }
+
+    private var previewIconName: String {
+        switch contentType {
+        case .image: "photo.on.rectangle.angled"
+        case .url: "link.circle.fill"
+        case .webPage: "globe.asia.australia.fill"
+        case .text: "text.quote"
+        case .unknown: "sparkles"
+        }
+    }
+
+    private var previewStatusText: String {
+        if isLoading { return strings.extractingStatus }
+        return strings.shareReadyToLight
+    }
+
+    private var statusText: String {
+        switch extractionStatus {
+        case .notNeeded: strings.capture
+        case .pending: strings.extractingStatus
+        case .fullText: strings.fullTextStatus
+        case .partialText: strings.partialTextStatus
+        case .urlOnly: strings.urlOnlyStatus
+        case .failed: strings.extractFailedStatus
+        }
+    }
+
+    private func clean(_ value: String?) -> String? {
+        let cleaned = value?.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let cleaned, !cleaned.isEmpty else { return nil }
+        return cleaned
     }
 
     // MARK: - Content Extraction
@@ -256,6 +433,112 @@ struct ShareExtensionView: View {
     }
 }
 
+private struct ShareConstellationBackdrop: View {
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.58)
+
+            LinearGradient(
+                colors: [
+                    Color(red: 0.00, green: 0.03, blue: 0.07).opacity(0.96),
+                    Color(red: 0.03, green: 0.17, blue: 0.20).opacity(0.78),
+                    Color.black.opacity(0.88)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            ShareStarField()
+                .opacity(0.78)
+                .blur(radius: 0.2)
+        }
+    }
+}
+
+private struct ShareStarField: View {
+    private let stars: [ShareStar] = [
+        ShareStar(x: 0.13, y: 0.16, size: 2.2, opacity: 0.72),
+        ShareStar(x: 0.24, y: 0.10, size: 1.2, opacity: 0.40),
+        ShareStar(x: 0.39, y: 0.19, size: 1.8, opacity: 0.55),
+        ShareStar(x: 0.62, y: 0.12, size: 2.4, opacity: 0.66),
+        ShareStar(x: 0.78, y: 0.21, size: 1.4, opacity: 0.45),
+        ShareStar(x: 0.86, y: 0.09, size: 2.0, opacity: 0.52),
+        ShareStar(x: 0.17, y: 0.32, size: 1.5, opacity: 0.40),
+        ShareStar(x: 0.34, y: 0.38, size: 2.7, opacity: 0.78),
+        ShareStar(x: 0.55, y: 0.31, size: 1.3, opacity: 0.38),
+        ShareStar(x: 0.73, y: 0.42, size: 1.9, opacity: 0.54),
+        ShareStar(x: 0.91, y: 0.35, size: 1.1, opacity: 0.36),
+        ShareStar(x: 0.09, y: 0.52, size: 1.7, opacity: 0.50),
+        ShareStar(x: 0.28, y: 0.58, size: 1.2, opacity: 0.38),
+        ShareStar(x: 0.47, y: 0.50, size: 2.0, opacity: 0.62),
+        ShareStar(x: 0.68, y: 0.60, size: 1.4, opacity: 0.42),
+        ShareStar(x: 0.84, y: 0.54, size: 2.5, opacity: 0.70)
+    ]
+
+    var body: some View {
+        GeometryReader { proxy in
+            Canvas { context, size in
+                let points = stars.map { star in
+                    CGPoint(x: size.width * star.x, y: size.height * star.y)
+                }
+
+                var route = Path()
+                for (index, point) in points.prefix(8).enumerated() {
+                    if index == 0 {
+                        route.move(to: point)
+                    } else {
+                        route.addLine(to: point)
+                    }
+                }
+                context.stroke(
+                    route,
+                    with: .color(Color(red: 0.30, green: 0.86, blue: 0.76).opacity(0.18)),
+                    lineWidth: 1
+                )
+
+                for star in stars {
+                    let rect = CGRect(
+                        x: size.width * star.x - star.size / 2,
+                        y: size.height * star.y - star.size / 2,
+                        width: star.size,
+                        height: star.size
+                    )
+                    context.fill(
+                        Path(ellipseIn: rect),
+                        with: .color(.white.opacity(star.opacity))
+                    )
+                }
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+    }
+}
+
+private struct ShareStar {
+    let x: Double
+    let y: Double
+    let size: Double
+    let opacity: Double
+}
+
+private struct ShareStatusPill: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(Color(red: 0.80, green: 0.96, blue: 0.92))
+            .lineLimit(1)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 5)
+            .background(Color(red: 0.12, green: 0.64, blue: 0.58).opacity(0.22), in: Capsule())
+            .overlay {
+                Capsule()
+                    .stroke(Color(red: 0.48, green: 0.95, blue: 0.85).opacity(0.22), lineWidth: 1)
+            }
+    }
+}
+
 private struct SharedContentPayload {
     var text: String = ""
     var urlString: String?
@@ -302,6 +585,10 @@ private struct SharedContentPayload {
         if cleaned.count > text.count {
             text = cleaned
         }
+        if urlString == nil,
+           let detectedURL = SourceURLValidator.firstValidatedWebURL(in: cleaned) {
+            urlString = detectedURL.absoluteString
+        }
         if contentType == .unknown {
             contentType = .text
         }
@@ -324,15 +611,23 @@ private struct SharedContentPayload {
         }
     }
 
+    private mutating func setURLString(_ candidate: String?) {
+        guard let candidate,
+              let url = SourceURLValidator.firstValidatedWebURL(in: candidate) else {
+            return
+        }
+        urlString = url.absoluteString
+    }
+
     mutating func merge(urlItem item: NSSecureCoding) {
         if let url = item as? URL {
-            urlString = url.absoluteString
+            setURLString(url.absoluteString)
         } else if let nsURL = item as? NSURL {
-            urlString = nsURL.absoluteString
+            setURLString(nsURL.absoluteString)
         } else if let string = item as? String {
-            urlString = string
+            setURLString(string)
         } else if let nsString = item as? NSString {
-            urlString = nsString as String
+            setURLString(nsString as String)
         }
 
         if urlString != nil, contentType == .unknown || contentType == .text {
@@ -374,7 +669,7 @@ private struct SharedContentPayload {
             }
         }
 
-        urlString = fileURL.absoluteString
+        setURLString(fileURL.absoluteString)
         if contentType == .unknown {
             contentType = .url
         }
@@ -405,7 +700,7 @@ private struct SharedContentPayload {
             }.value
             setImageAttachmentFileName(fileName)
         } else {
-            urlString = url.absoluteString
+            setURLString(url.absoluteString)
         }
     }
 
@@ -459,7 +754,7 @@ private struct SharedContentPayload {
             self.title = title
         }
         if let url = firstString(in: propertyList, keys: ["url", "URL"]) {
-            urlString = url
+            setURLString(url)
         }
         if let body = firstString(in: propertyList, keys: ["body", "text", "selection"]) {
             merge(text: body)

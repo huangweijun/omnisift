@@ -219,14 +219,7 @@ final class ClipboardCaptureService {
     }
 
     private func firstWebURL(in text: String) -> URL? {
-        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
-            return nil
-        }
-        let range = NSRange(text.startIndex..<text.endIndex, in: text)
-        return detector
-            .matches(in: text, options: [], range: range)
-            .compactMap(\.url)
-            .first { SourceURLValidator.validatedWebURL($0) != nil }
+        SourceURLValidator.firstValidatedWebURL(in: text)
     }
 
     private func candidateID(for url: URL) -> String {

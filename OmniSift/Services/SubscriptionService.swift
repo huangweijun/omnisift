@@ -15,12 +15,15 @@ class SubscriptionService {
     /// Entitlement identifier configured in RevenueCat dashboard
     static let entitlementID = "pro"
 
-    /// RevenueCat API key injected from Config/Local.xcconfig into Info.plist.
+    /// RevenueCat API key injected from local config or the ignored Secrets.plist.
     static let apiKey: String? = {
         if let key = Bundle.main.configuredString(forInfoDictionaryKey: "REVENUECAT_API_KEY") {
-            return key
+            return normalizedRevenueCatAPIKey(key)
         }
-        return Bundle.main.secretPlistString(forKey: "REVENUECAT_API_KEY")
+        guard let key = Bundle.main.secretPlistString(forKey: "REVENUECAT_API_KEY") else {
+            return nil
+        }
+        return normalizedRevenueCatAPIKey(key)
     }()
 
     /// Configure RevenueCat SDK — call once at app launch
@@ -119,4 +122,12 @@ extension Bundle {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
     }
+}
+
+private func normalizedRevenueCatAPIKey(_ value: String) -> String? {
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty, !trimmed.hasPrefix("test_") else {
+        return nil
+    }
+    return trimmed
 }

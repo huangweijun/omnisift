@@ -59,12 +59,12 @@ struct AppStrings {
     var plansUnavailable: String { text("Plans unavailable", "暂时无法显示套餐") }
     var plansUnavailableDescription: String {
         text(
-            "Check your network and RevenueCat product configuration, then try again.",
-            "请检查网络和订阅商品配置，然后重试。"
+            "Plans are taking a moment to load. Check your connection and try again.",
+            "套餐加载需要一点时间，请检查网络后重试。"
         )
     }
-    var loadPlansFailed: String { text("Could not load plans. Please try again.", "无法加载套餐，请重试。") }
-    var storeUnavailable: String { text("The purchase service is not configured for this build.", "当前版本尚未配置购买服务。") }
+    var loadPlansFailed: String { text("Plans are taking longer than expected.", "套餐加载时间较长。") }
+    var storeUnavailable: String { text("Plans are temporarily unavailable.", "套餐暂时无法显示。") }
     var continueButton: String { text("Continue", "继续") }
     func continueWithPrice(_ price: String) -> String {
         switch language {
@@ -80,7 +80,8 @@ struct AppStrings {
     var selectedPlan: String { text("Selected", "已选择") }
     var bestValue: String { text("Best value", "更划算") }
     var introOffer: String { text("Intro offer", "首期优惠") }
-    var purchasePrivacyNote: String { text("Secure checkout by Apple", "由应用商店安全结算") }
+    var purchasePrivacyNote: String { text("Secure checkout by Apple. Renews until canceled.", "由应用商店安全结算，可随时取消续订。") }
+    var termsOfUse: String { text("Terms of Use (EULA)", "使用条款 (EULA)") }
     var weeklyPlan: String { text("Weekly", "周付") }
     var monthlyPlan: String { text("Monthly", "月付") }
     var twoMonthPlan: String { text("2 Months", "两个月") }
@@ -430,6 +431,10 @@ struct AppStrings {
             return text("Rate limited. Try again later.", "请求过于频繁，请稍后再试。")
         case "Cloud service unauthorized.":
             return text("Cloud service unauthorized.", "云端服务未授权。")
+        case "Cloud service app secret is not configured.":
+            return text("Cloud service app secret is not configured.", "云端服务密钥未配置。")
+        case "Cloud service rejected authorization.":
+            return text("Cloud service rejected authorization.", "云端服务拒绝授权。")
         default:
             if error.hasPrefix("App Group container is not available:") {
                 return text(error, "应用组容器不可用。")
@@ -465,10 +470,13 @@ struct AppStrings {
     }
 
     var shareSaveToApp: String { text("Save to OmniSift", "保存到知漏") }
-    var shareWillCleanLater: String { text("AI will clean and structure this later", "智能处理稍后会清理并结构化内容") }
+    var shareWillCleanLater: String { text("Collect now. AI will light the star map later.", "先采集下来，稍后点亮你的星图") }
     var cancel: String { text("Cancel", "取消") }
     var extractingContent: String { text("Extracting content...", "正在提取内容...") }
     var imageSavedForOCR: String { text("Image saved. OmniSift will run OCR after import.", "图片已保存，导入后知漏会识别其中的文字。") }
+    var shareIncomingSignal: String { text("Incoming signal", "采集信号") }
+    var shareReadyToLight: String { text("Ready to become a star", "准备点亮一颗新星") }
+    var shareNoReadablePreview: String { text("No readable preview yet. The source will still be saved.", "暂时没有可读预览，仍会保留来源。") }
     var save: String { text("Save", "保存") }
     var saving: String { text("Saving...", "保存中...") }
     var shareSaveError: String { text("Could not save. Please try again.", "无法保存，请重试。") }
