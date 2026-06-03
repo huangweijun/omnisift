@@ -42,11 +42,25 @@
     "text": "Stop losing useful AI answers. Share a snippet to OmniSift and turn it into a structured knowledge card on iPhone.\n\nDownload: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
   },
   {
+    "id": "launch-day3-x-demo",
+    "day": 3,
+    "channel": "x",
+    "language": "en",
+    "text": "A tiny workflow demo matters more than a feature list.\n\nOmniSift is for the moment a useful answer, paragraph, chat, or screenshot appears on iPhone: share it, let AI structure it, and keep the card locally.\n\nApp Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
+  },
+  {
     "id": "launch-day4-linkedin",
     "day": 4,
     "channel": "linkedin",
     "language": "en",
     "text": "Most note-taking tools start from a blank page.\n\nThat is useful when you already know what you want to write. It is less useful when the idea appears somewhere else first: inside an AI answer, a browser paragraph, a chat message, or a screenshot.\n\nOmniSift is built around that earlier moment. On iOS, you share text, links, articles, or screenshots from another app. OmniSift uses cloud AI to turn the snippet into a structured knowledge card: title, summary, highlights, tags, named entities, and relations.\n\nThe boundary matters: no account required, no analytics tracking, cards stored locally on device, and shared text sent to cloud AI for processing only.\n\nDownload: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
+  },
+  {
+    "id": "launch-day4-x-blank-notes",
+    "day": 4,
+    "channel": "x",
+    "language": "en",
+    "text": "Blank notes are great when you already know what to write. OmniSift starts one step earlier: capture useful fragments from AI answers, web pages, chats, and screenshots, then turn them into structured cards on iPhone.\n\nhttps://omnisift.app/save-ai-answers.html"
   },
   {
     "id": "launch-day5-producthunt",
@@ -61,5 +75,12 @@
     "channel": "show-hn-draft",
     "language": "en",
     "text": "Title: Show HN: OmniSift - capture iOS snippets into AI knowledge cards\n\nI built OmniSift because I kept losing useful fragments from AI answers, articles, chats, and screenshots before they made it into a real note.\n\nIt is an iOS Share Sheet workflow: share text, links, articles, or screenshots, and OmniSift turns the fragment into a structured card with a title, summary, highlights, tags, entities, and relations.\n\nThe product boundary is intentionally narrow. It is not a long-form note editor. It is for capture before organizing.\n\nPrivacy boundary: no account, no analytics tracking, cards stored locally on device. Shared text is sent to cloud AI for processing only.\n\nWebsite: https://omnisift.app/\nApp Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
+  },
+  {
+    "id": "launch-day5-x-why-built",
+    "day": 5,
+    "channel": "x",
+    "language": "en",
+    "text": "I built OmniSift because useful ideas kept disappearing between apps. It is a small iOS Share Sheet workflow: send a snippet in, get a structured knowledge card out.\n\nWebsite: https://omnisift.app/\nApp Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
   }
 ]
