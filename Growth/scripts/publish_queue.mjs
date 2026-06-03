@@ -21,6 +21,10 @@ function daysSinceStart() {
 }
 
 function assertSafePost(post) {
+  if (post.channel === "x" && [...post.text].length > 280) {
+    throw new Error(`Blocked overlong X post in ${post.id}: ${[...post.text].length}/280`);
+  }
+
   const blocked = [
     /unlimited/i,
     /lifetime/i,
