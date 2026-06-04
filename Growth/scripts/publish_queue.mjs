@@ -23,7 +23,7 @@ function daysSinceStart() {
   const start = new Date(`${launchStart}T00:00:00Z`);
   const now = new Date();
   const delta = Math.floor((now - start) / 86400000) + 1;
-  return Math.max(1, Math.min(delta, 5));
+  return Math.max(1, delta);
 }
 
 function assertSafePost(post) {
@@ -128,6 +128,13 @@ async function postToWebhook(post) {
 const queue = JSON.parse(fs.readFileSync(queuePath, "utf8"));
 const day = daysSinceStart();
 const posts = queue.filter((post) => post.day === day);
+const maxQueueDay = Math.max(...queue.map((post) => post.day));
+
+if (!dayOverride && day > maxQueueDay) {
+  console.log(`Launch promotion queue complete; day ${day} is beyond configured day ${maxQueueDay}.`);
+  process.exit(0);
+}
+
 const publishPosts = channelAllowlist.size
   ? posts.filter((post) => channelAllowlist.has(post.channel))
   : posts;

@@ -190,4 +190,6 @@ The workflow runs every day at `01:30 UTC`.
 
 Launch day is calculated from `PROMOTION_LAUNCH_START`.
 
+Scheduled runs stop publishing automatically after the last configured queue day. Use a manual `PROMOTION_DAY` override only when intentionally replaying a day; replaying an X post too soon can be rejected by Buffer as a duplicate.
+
 For the first run, keep `PROMOTION_PUBLISH_MODE=dry-run`. After confirming the Make route works, switch to `webhook`.
