@@ -1,0 +1,10 @@
+{
+  "version": "2026-06-04-autopilot",
+  "approvalPolicy": {
+    "autoPublishChannels": ["x", "reddit"],
+    "reddit": {
+      "profileSubreddit": "u_InterestingEye6675",
+      "allowCommunityPosting": false
+    }
+  }
+}

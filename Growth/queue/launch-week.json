@@ -81,9 +81,9 @@
     "day": 5,
     "channel": "reddit",
     "language": "en",
-    "redditMode": "draft",
+    "redditMode": "profile",
     "kind": "self",
-    "subreddit": "",
+    "subreddit": "u_InterestingEye6675",
     "title": "I built an iOS Share Sheet app for turning useful snippets into structured knowledge cards",
     "text": "I built OmniSift because I kept losing useful fragments from AI answers, articles, chats, and screenshots before they made it into a real note.\n\nThe app is intentionally narrow: share text, links, articles, or screenshots from another iOS app, and it turns the fragment into a structured card with a title, summary, highlights, tags, named entities, and relations.\n\nPrivacy boundary: no account, no analytics tracking, cards stored locally on device. Shared text is sent to cloud AI for processing only.\n\nI am looking for feedback from people who save research snippets or AI answers on iPhone. Is this capture-before-organizing workflow useful, or would you expect it to live inside a larger notes app?\n\nWebsite: https://omnisift.app/\nApp Store: https://apps.apple.com/us/app/omnisift/id6773056945?uo=4"
   },

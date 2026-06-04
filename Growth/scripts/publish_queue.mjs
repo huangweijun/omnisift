@@ -5,6 +5,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const queuePath = path.join(root, "Growth", "queue", "launch-week.json");
+const policyPath = path.join(root, "Growth", "promotion-policy.json");
 const outboxDir = path.join(root, "Growth", "outbox");
 const publishEndpoint = process.env.PROMOTION_WEBHOOK_URL || "";
 const publishApiKey = process.env.PROMOTION_WEBHOOK_API_KEY || "";
@@ -17,6 +18,18 @@ const channelAllowlist = new Set(
     .map((channel) => channel.trim())
     .filter(Boolean)
 );
+const policy = fs.existsSync(policyPath)
+  ? JSON.parse(fs.readFileSync(policyPath, "utf8"))
+  : {};
+const approvalPolicy = policy.approvalPolicy || {};
+const redditPolicy = approvalPolicy.reddit || {};
+const approvedChannels = new Set(approvalPolicy.autoPublishChannels || []);
+const blockedClaimPatterns = [
+  /unlimited/i,
+  /lifetime/i,
+  /终身/,
+  /无限/
+];
 
 function daysSinceStart() {
   if (dayOverride) return Number(dayOverride);
@@ -26,54 +39,85 @@ function daysSinceStart() {
   return Math.max(1, delta);
 }
 
-function assertSafePost(post) {
-  if (post.channel === "x" && [...post.text].length > 280) {
-    throw new Error(`Blocked overlong X post in ${post.id}: ${[...post.text].length}/280`);
+function listReviewFindings(post) {
+  const findings = [];
+  const text = post.text || "";
+
+  if (approvedChannels.size && !approvedChannels.has(post.channel)) {
+    findings.push(`channel ${post.channel} is not enabled for auto-publishing`);
+  }
+
+  if (post.channel === "x" && [...text].length > 280) {
+    findings.push(`X post is too long: ${[...text].length}/280`);
   }
 
   if (post.channel === "reddit") {
-    if (!post.title) {
-      throw new Error(`Blocked Reddit post without title in ${post.id}`);
+    const mode = post.redditMode || "draft";
+    const title = post.title || "";
+    const subreddit = post.subreddit || "";
+
+    if (!title) findings.push("Reddit post is missing a title");
+    if ([...title].length > 300) {
+      findings.push(`Reddit title is too long: ${[...title].length}/300`);
     }
 
-    if ([...post.title].length > 300) {
-      throw new Error(`Blocked overlong Reddit title in ${post.id}: ${[...post.title].length}/300`);
-    }
-
-    if (post.redditMode !== "draft" && process.env.PROMOTION_ALLOW_LIVE_REDDIT !== "true") {
-      throw new Error(`Blocked live Reddit publishing for ${post.id}; set PROMOTION_ALLOW_LIVE_REDDIT=true only after subreddit rules are confirmed`);
-    }
-
-    if (post.redditMode !== "draft" && !post.subreddit) {
-      throw new Error(`Blocked live Reddit publishing without subreddit in ${post.id}`);
+    if (mode === "profile") {
+      const expectedProfileSubreddit = redditPolicy.profileSubreddit || "";
+      if (!subreddit || !/^u_[A-Za-z0-9_-]+$/.test(subreddit)) {
+        findings.push("Reddit profile post must target a u_username profile subreddit");
+      }
+      if (expectedProfileSubreddit && subreddit !== expectedProfileSubreddit) {
+        findings.push(`Reddit profile target ${subreddit} does not match policy target ${expectedProfileSubreddit}`);
+      }
+    } else if (mode === "community") {
+      if (redditPolicy.allowCommunityPosting !== true && process.env.PROMOTION_ALLOW_LIVE_REDDIT !== "true") {
+        findings.push("Reddit community posting is disabled by policy");
+      }
+      if (!subreddit || /^u_[A-Za-z0-9_-]+$/.test(subreddit)) {
+        findings.push("Reddit community post must target a non-profile subreddit");
+      }
+    } else if (mode !== "draft") {
+      findings.push(`Unsupported Reddit mode: ${mode}`);
     }
   }
 
-  const blocked = [
-    /unlimited/i,
-    /lifetime/i,
-    /终身/,
-    /无限/
-  ];
-
-  for (const pattern of blocked) {
-    if (pattern.test(post.text)) {
-      throw new Error(`Blocked unsafe claim in ${post.id}: ${pattern}`);
+  for (const pattern of blockedClaimPatterns) {
+    if (pattern.test(text)) {
+      findings.push(`unsafe claim matched ${pattern}`);
     }
   }
 
-  const lowerText = post.text.toLowerCase();
+  const lowerText = text.toLowerCase();
   const mentionsFullyLocal = lowerText.includes("fully local ai");
   const negatesFullyLocal = lowerText.includes("does not claim fully local ai");
   if (mentionsFullyLocal && !negatesFullyLocal) {
-    throw new Error(`Blocked unsafe fully-local AI claim in ${post.id}`);
+    findings.push("unsafe fully-local AI claim");
   }
 
-  const mentionsChineseFullyLocal = post.text.includes("完全本地 AI");
-  const negatesChineseFullyLocal = post.text.includes("不声称完全本地 AI");
+  const mentionsChineseFullyLocal = text.includes("完全本地 AI");
+  const negatesChineseFullyLocal = text.includes("不声称完全本地 AI");
   if (mentionsChineseFullyLocal && !negatesChineseFullyLocal) {
-    throw new Error(`Blocked unsafe fully-local AI claim in ${post.id}`);
+    findings.push("unsafe fully-local AI claim");
   }
+
+  return findings;
+}
+
+function assertSafePost(post) {
+  const findings = listReviewFindings(post);
+  if (findings.length) throw new Error(`Blocked ${post.id}: ${findings.join("; ")}`);
+}
+
+function reviewedPost(post) {
+  return {
+    ...post,
+    approval: {
+      status: "approved",
+      checkedAt: new Date().toISOString(),
+      policyVersion: policy.version || "inline",
+      mode: post.channel === "reddit" ? post.redditMode || "draft" : "direct"
+    }
+  };
 }
 
 function renderMarkdown(day, posts) {
@@ -115,7 +159,7 @@ async function postToWebhook(post) {
     body: JSON.stringify({
       product: "OmniSift",
       source: "github-actions",
-      post
+      post: reviewedPost(post)
     })
   });
 
@@ -139,7 +183,7 @@ const publishPosts = channelAllowlist.size
   ? posts.filter((post) => channelAllowlist.has(post.channel))
   : posts;
 
-for (const post of posts) assertSafePost(post);
+for (const post of publishPosts) assertSafePost(post);
 
 fs.mkdirSync(outboxDir, { recursive: true });
 const outboxPath = path.join(outboxDir, `day-${day}.md`);

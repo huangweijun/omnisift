@@ -73,7 +73,7 @@ Recommended channel actions:
 
 - `x`: Buffer queue or X module/API.
 - `threads`: Buffer queue if available on the connected Buffer account.
-- `reddit`: start as a draft task. Use Make's verified Reddit app and `Submit a Post` only after the subreddit is chosen, its rules allow self-promotion, and the owner approves Reddit OAuth.
+- `reddit`: use Make's verified Reddit app to auto-post to the owner profile subreddit first. Do not auto-post to third-party communities unless their rules and account eligibility are explicitly confirmed.
 - `linkedin`: LinkedIn page post or Buffer queue.
 - `jike`: Notion/Google Sheet draft queue.
 - `video-caption`: Notion/Google Sheet task for short video production.
@@ -86,31 +86,35 @@ If a platform does not provide an official API or approved integration, route th
 
 Buffer does not expose Reddit as a connectable channel in the current Buffer account, so route Reddit through Make instead.
 
-Recommended first version:
+Safe autopilot version:
 
 ```text
 Custom webhook
   -> Router
   -> filter: post.channel = reddit
-  -> Google Sheets / Notion / Airtable: create "Reddit draft" row
+  -> Data Store: create "published/draft audit" row
+  -> Reddit: submit a self post to the owner profile subreddit
 ```
 
 Map these fields:
 
-- Draft title: `post.title`
-- Draft body: `post.text`
+- Subreddit: `post.subreddit` (`u_InterestingEye6675` for the current owner profile)
+- Title: `post.title`
+- Body: `post.text`
+- Kind: `post.kind` (`self`)
 - Mode: `post.redditMode`
-- Suggested subreddit: `post.subreddit`
 - Source id: `post.id`
 
-When moving from draft to live Reddit publishing, replace the draft module with Make's verified `reddit -> Submit a Post` action:
+The current safe live Reddit mode is `redditMode=profile`. The publisher permits profile posting only when `post.subreddit` matches `Growth/promotion-policy.json`.
+
+When moving from profile posting to community posting, update the policy and Make route only after the subreddit is chosen and its rules allow the post:
 
 - Kind: `self`
 - Subreddit: the approved subreddit name, without `/r/`
 - Title: `post.title`
 - Text: `post.text`
 
-Keep `redditMode=draft` until the target subreddit and rules are confirmed. The local publisher blocks live Reddit posts unless `PROMOTION_ALLOW_LIVE_REDDIT=true` is set explicitly.
+The local publisher blocks community Reddit posts unless `PROMOTION_ALLOW_LIVE_REDDIT=true` is set explicitly or `allowCommunityPosting` is enabled in the promotion policy.
 
 ## GitHub Configuration
 
@@ -174,9 +178,10 @@ If the header is missing or wrong, Make should stop the scenario before the rout
 - X posts over 280 characters
 - Reddit posts without a title
 - Reddit titles over 300 characters
-- live Reddit publishing unless explicitly enabled after subreddit rules are confirmed
+- Reddit community publishing unless explicitly enabled after subreddit rules are confirmed
+- Reddit profile publishing to any profile other than the policy-approved owner profile
 
-`PROMOTION_CHANNELS` should stay narrow until each Make route is connected to an official platform integration or a draft queue. OmniSift currently uses `x`; add `reddit` only after the Reddit draft route exists in Make.
+`PROMOTION_CHANNELS` should stay narrow until each Make route is connected to an official platform integration or a draft/audit queue. OmniSift currently uses `x,reddit`.
 
 Keep platform credentials outside Git:
 
