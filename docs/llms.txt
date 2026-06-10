@@ -6,6 +6,8 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 
 - Product: https://omnisift.app/
 - Use cases: https://omnisift.app/use-cases.html
+- First card: https://omnisift.app/first-card.html
+- Capture-first note-taking: https://omnisift.app/capture-first-note-taking.html
 - Comparison: https://omnisift.app/compare.html
 - FAQ: https://omnisift.app/faq.html
 - Changelog: https://omnisift.app/changelog.html
@@ -39,6 +41,10 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 ## Short description
 
 OmniSift is for people who find useful ideas in ChatGPT, Claude, Safari, Notes, WeChat, Xiaohongshu, X, screenshots, and other iOS apps. Instead of manually copying snippets into a note app, they can send or copy content to OmniSift, receive a structured knowledge card, watch topic constellations light up, and use the knowledge compass to decide what to search, compare, or collect next.
+
+The first-card page is a guided Safari starter page for testing the iOS Share Sheet flow and creating a first OmniSift knowledge card.
+
+Capture-first note-taking on iPhone means saving the useful fragment before deciding where it belongs. OmniSift supports this workflow for AI answers, web paragraphs, chat messages, screenshots, links, and other scattered inputs.
 
 ## Chinese description
 

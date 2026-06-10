@@ -8,6 +8,8 @@ const docsDir = path.join(root, "docs");
 const requiredPages = [
   { file: "index.html", url: "https://omnisift.app/", jsonLd: true },
   { file: "use-cases.html", url: "https://omnisift.app/use-cases.html" },
+  { file: "first-card.html", url: "https://omnisift.app/first-card.html", jsonLd: true },
+  { file: "capture-first-note-taking.html", url: "https://omnisift.app/capture-first-note-taking.html", jsonLd: true },
   { file: "compare.html", url: "https://omnisift.app/compare.html" },
   { file: "faq.html", url: "https://omnisift.app/faq.html", jsonLd: true },
   { file: "changelog.html", url: "https://omnisift.app/changelog.html", jsonLd: true },

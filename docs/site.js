@@ -11,6 +11,7 @@
       "brand.name": "OmniSift",
       "brand.mark": "O",
       "nav.useCases": "Use cases",
+      "nav.firstCard": "First card",
       "nav.compare": "Compare",
       "nav.faq": "FAQ",
       "nav.privacy": "Privacy",
@@ -63,6 +64,28 @@
       "home.pricing.lead": "OmniSift is live as a free App Store download. Pro availability is handled through App Store subscriptions.",
       "home.pricing.free": "Free",
       "home.pricing.pro": "OmniSift Pro",
+
+      "first.hero.kicker": "Safari starter",
+      "first.hero.title": "Create your first OmniSift card.",
+      "first.hero.lead": "Use this clean page to try the iOS Share Sheet. Safari gives the most predictable first capture, so you can see OmniSift work before testing noisier apps.",
+      "first.hero.cta": "Share this page to OmniSift",
+      "first.hero.backup": "Show manual steps",
+      "first.hero.fallback": "If the share panel does not open, tap Safari's Share button at the bottom of the screen.",
+      "first.panel.label": "First card",
+      "first.steps.kicker": "Do this in Safari",
+      "first.steps.title": "Three taps to make the first card.",
+      "first.step1.title": "Tap Safari Share",
+      "first.step1.body": "Use the system Share button at the bottom of Safari.",
+      "first.step2.title": "Choose OmniSift",
+      "first.step2.body": "If hidden, tap More, enable OmniSift, and move it near the top.",
+      "first.step3.title": "Tap Save",
+      "first.step3.body": "Wait for the saved checkmark before returning to OmniSift.",
+      "first.sample.kicker": "Sample insight",
+      "first.sample.title": "Capture first, organize later.",
+      "first.after.kicker": "After the first card",
+      "first.after.title": "Try the same flow where ideas actually appear.",
+      "first.after.lead": "Once the Safari capture works, try sharing a ChatGPT answer, an article paragraph, a note, or a screenshot. OmniSift is designed for those scattered moments.",
+      "first.after.ai": "Save an AI answer",
 
       "use.hero.kicker": "Use cases",
       "use.hero.title": "For the moments when an idea appears outside your notes app.",
@@ -147,6 +170,7 @@
       "brand.name": "知漏",
       "brand.mark": "知",
       "nav.useCases": "使用场景",
+      "nav.firstCard": "第一张卡片",
       "nav.compare": "对比",
       "nav.faq": "常见问题",
       "nav.privacy": "隐私",
@@ -199,6 +223,28 @@
       "home.pricing.lead": "知漏已作为免费 iOS App 在 App Store 上线。专业版可用性由 App Store 订阅处理。",
       "home.pricing.free": "免费版",
       "home.pricing.pro": "知漏专业版",
+
+      "first.hero.kicker": "Safari 入门",
+      "first.hero.title": "创建你的第一张知漏卡片。",
+      "first.hero.lead": "用这页干净内容试一次 iOS 分享菜单。Safari 的第一次捕获最可控，你可以先看到知漏如何工作，再去尝试更复杂的 App。",
+      "first.hero.cta": "把这页分享到知漏",
+      "first.hero.backup": "查看手动步骤",
+      "first.hero.fallback": "如果分享面板没有打开，请点击 Safari 底部的系统分享按钮。",
+      "first.panel.label": "第一张卡片",
+      "first.steps.kicker": "在 Safari 中这样做",
+      "first.steps.title": "三步创建第一张卡片。",
+      "first.step1.title": "点击 Safari 分享",
+      "first.step1.body": "使用 Safari 底部的系统分享按钮。",
+      "first.step2.title": "选择知漏",
+      "first.step2.body": "如果没有看到，点击“更多”，启用知漏，并把它移到靠前位置。",
+      "first.step3.title": "点击保存",
+      "first.step3.body": "等到出现已保存确认，再返回知漏。",
+      "first.sample.kicker": "示例洞察",
+      "first.sample.title": "先捕获，再整理。",
+      "first.after.kicker": "第一张卡片之后",
+      "first.after.title": "到真正出现想法的地方试试同样流程。",
+      "first.after.lead": "Safari 捕获成功后，可以试着分享 ChatGPT 回答、文章段落、备忘录或截图。知漏就是为这些分散时刻设计的。",
+      "first.after.ai": "保存 AI 回答",
 
       "use.hero.kicker": "使用场景",
       "use.hero.title": "适合那些想法出现在笔记软件之外的时刻。",
@@ -332,8 +378,29 @@
     });
   }
 
+  function bindShareControls() {
+    document.querySelectorAll("[data-share-current-page]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var shareData = {
+          title: document.title,
+          text: "Create your first OmniSift card from Safari.",
+          url: window.location.href
+        };
+
+        if (navigator.share) {
+          navigator.share(shareData).catch(function () {});
+        } else {
+          document.querySelectorAll("[data-share-fallback]").forEach(function (hint) {
+            hint.classList.add("is-visible");
+          });
+        }
+      });
+    });
+  }
+
   function init() {
     bindLanguageControls();
+    bindShareControls();
     setLanguage(currentLanguage());
   }
 
