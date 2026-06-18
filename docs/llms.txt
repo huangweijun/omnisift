@@ -27,8 +27,8 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 - Account requirement: no account required
 - Analytics and tracking: no analytics services, advertising frameworks, or tracking technologies
 - Storage: processed knowledge cards are stored locally on device
-- Cloud processing: text explicitly shared to OmniSift is sent to cloud AI for processing only
-- Cloud AI service listed in privacy policy: zaimaai.cn
+- Cloud processing: text explicitly shared to OmniSift is sent to OmniSift cloud processing only during processing
+- Cloud processing service listed in privacy policy: api.omnisift.cn
 - Subscription handling: Apple App Store payment system via RevenueCat
 - Subscription availability: Pro subscriptions are handled by Apple and may depend on App Store subscription review/availability
 
@@ -40,7 +40,7 @@ OmniSift, also known as 知漏, is an iOS AI knowledge capture app. It lets user
 
 ## Short description
 
-OmniSift is for people who find useful ideas in ChatGPT, Claude, Safari, Notes, WeChat, Xiaohongshu, X, screenshots, and other iOS apps. Instead of manually copying snippets into a note app, they can send or copy content to OmniSift, receive a structured knowledge card, watch topic constellations light up, and use the knowledge compass to decide what to search, compare, or collect next.
+OmniSift is for people who find useful ideas in Safari, Notes, WeChat, Xiaohongshu, X, screenshots, and other iOS apps. Instead of manually copying snippets into a note app, they can send or copy content to OmniSift, receive a structured knowledge card, watch topic constellations light up, and use the knowledge compass to decide what to search, compare, or collect next.
 
 The first-card page is a guided Safari starter page for testing the iOS Share Sheet flow and creating a first OmniSift knowledge card.
 

@@ -20,17 +20,17 @@ AI Cross-App Snippet Capture
 
 Stop losing brilliant ideas scattered across your apps.
 
-OmniSift captures text from any app — ChatGPT, Claude, Safari, Notes, WeChat, Twitter — and transforms raw snippets into structured knowledge cards using AI. No copy-pasting into yet another note app. Just share, and let AI do the thinking.
+OmniSift captures text from apps such as Safari, Notes, WeChat, X, web pages, chats, and screenshots, then transforms raw snippets into structured knowledge cards using cloud processing. No copy-pasting into yet another note app. Just share a fragment and keep it organized.
 
 HOW IT WORKS
 
 1. Share any text snippet from any app via the iOS Share Sheet
-2. Cloud AI instantly distills the content into a structured knowledge card
+2. OmniSift cloud processing distills the content into a structured knowledge card
 3. Browse, search, and connect your insights in a personal knowledge graph
 
-AI-POWERED KNOWLEDGE DISTILLATION
+SMART KNOWLEDGE DISTILLATION
 
-Every snippet you share is processed by advanced AI (Claude Sonnet) to extract:
+Every snippet you share is processed to extract:
 • A concise title capturing the core idea
 • Key highlights worth remembering
 • A clear summary for quick review
@@ -44,14 +44,14 @@ OmniSift doesn't just store notes — it builds connections. Entities and relati
 
 RELATED INSIGHTS
 
-AI automatically surfaces related cards when you view any entry. Your knowledge compounds over time as the graph grows denser and more interconnected.
+OmniSift automatically surfaces related cards when you view any entry. Your knowledge compounds over time as the graph grows denser and more interconnected.
 
 PRIVACY FIRST
 
 • All cards stored locally on your device
 • No account required — start using immediately
 • No tracking, no analytics, no data mining
-• Text is sent to AI for processing only — nothing is stored on servers
+• Text is sent to the OmniSift cloud processing API only during processing — nothing is stored on servers
 
 EXPORT & SHARE
 
@@ -59,7 +59,7 @@ Turn any knowledge card into a beautiful shareable image. Perfect for social med
 
 PRICING
 
-• Free: 5 AI processing uses per day
+• Free: 5 processing uses per day
 • Pro: 50 uses per day — ¥12/month or ¥68/year
 
 Built for curious minds who consume knowledge across dozens of apps and refuse to let insights slip away.
@@ -68,17 +68,17 @@ Built for curious minds who consume knowledge across dozens of apps and refuse t
 
 别再让散落各处的灵感白白流失。
 
-知漏从任意 App 捕获文字片段——ChatGPT、Claude、Safari、备忘录、微信、Twitter——利用 AI 将零散内容转化为结构化知识卡片。无需反复复制粘贴，只需分享，AI 帮你完成思考。
+知漏可以从 Safari、备忘录、微信、X、网页、聊天内容和截图等来源捕获文字片段，并通过云端处理将零散内容转化为结构化知识卡片。无需反复复制粘贴，只需分享片段，就能保持整理。
 
 使用方式
 
 1. 在任意 App 中选中文字，通过 iOS 分享菜单发送到知漏
-2. 云端 AI 即时将内容提炼为结构化知识卡片
+2. 知漏云端处理会将内容提炼为结构化知识卡片
 3. 浏览、搜索并连接你的个人知识图谱
 
-AI 知识蒸馏
+智能知识蒸馏
 
-每条分享的片段都经由先进 AI（Claude Sonnet）处理，自动提取：
+每条分享的片段都会被处理并提取：
 • 精炼标题，捕捉核心观点
 • 关键高亮，值得记住的要点
 • 清晰摘要，方便快速回顾
@@ -92,14 +92,14 @@ AI 知识蒸馏
 
 关联洞察
 
-AI 自动在你查看任何卡片时推荐相关内容。随着图谱日益丰富，你的知识不断产生复利效应。
+知漏会在你查看任何卡片时自动推荐相关内容。随着图谱日益丰富，你的知识不断产生复利效应。
 
 隐私优先
 
 • 所有卡片存储在本地设备
 • 无需注册账号——即开即用
 • 无追踪、无分析、无数据挖掘
-• 文本仅发送至 AI 处理，服务器不存储任何内容
+• 文本仅在处理时发送至 OmniSift 云端处理 API，服务器不存储任何内容
 
 导出与分享
 
@@ -107,18 +107,18 @@ AI 自动在你查看任何卡片时推荐相关内容。随着图谱日益丰�
 
 定价
 
-• 免费版：每日 5 次 AI 处理
+• 免费版：每日 5 次处理
 • Pro 版：每日 50 次——¥12/月 或 ¥68/年
 
 为那些在数十个 App 中汲取知识、不愿让任何灵感溜走的好奇心而生。
 
 ## 7. Keywords (English, max 100 chars)
 
-knowledge,AI,snippet,capture,share extension,graph,notes,summary,highlight,insight,organize,cards
+knowledge,snippet,capture,share extension,graph,notes,summary,highlight,insight,organize,cards
 
 ## 8. Keywords (Chinese, max 100 chars)
 
-知识管理,AI摘要,碎片整理,知识图谱,分享扩展,笔记,高亮,洞察,卡片,跨应用,智能提取,收藏
+知识管理,摘要,碎片整理,知识图谱,分享扩展,笔记,高亮,洞察,卡片,跨应用,智能提取,收藏
 
 ## 9. Category
 
@@ -134,20 +134,22 @@ Testing the Share Extension:
 3. Tap the Share button in the system share sheet.
 4. Find "OmniSift" (知漏) in the share extensions list. If not visible, tap "More" and enable it.
 5. The Share Extension UI will appear showing the selected text. Tap "Save" to process.
-6. The app uses cloud AI (Claude Sonnet via api.zaimaai.cn) to process the text. An active internet connection is required.
+6. The app uses the OmniSift cloud processing API at api.omnisift.cn to process the text. An active internet connection is required.
 7. Open the main OmniSift app to see the generated knowledge card with title, summary, highlights, tags, and extracted entities.
 8. Free users get 5 uses per day. No account or sign-in is required.
 
-Note: The AI processing requires network access. If the API is temporarily unavailable, the app will show an error state and allow retry. No user data is stored on our servers — text is sent for processing only and results are stored locally on device.
+Note: Cloud processing requires network access. If the API is temporarily unavailable, the app will show an error state and allow retry. No user data is stored on our servers — text is sent for processing only and results are stored locally on device.
+
+Compliance note for App Review: This update removes named third-party generative assistant and model-brand references from the app metadata and user-visible demo content. OmniSift is not branded as a third-party assistant client. The app processes user-shared text through the OmniSift backend at api.omnisift.cn, and no third-party assistant branded functionality is exposed in the China storefront build.
 
 ## 11. What's New (v1.0.0)
 
 Initial release of OmniSift (知漏).
 
 • Share Extension: capture text from any app via the iOS Share Sheet
-• AI-powered knowledge distillation with title, highlights, summary, and tags
+• Smart knowledge distillation with title, highlights, summary, and tags
 • Personal knowledge graph with entities and semantic relations
 • Related insights discovery across all your cards
 • Export cards as shareable images
-• Free tier: 5 AI uses per day
+• Free tier: 5 processing uses per day
 • Pro subscription: 50 uses per day

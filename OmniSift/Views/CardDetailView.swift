@@ -644,8 +644,8 @@ private extension View {
 #Preview {
     NavigationStack {
         CardDetailView(card: InsightCard(
-            rawText: "This is a sample raw text from a conversation with Claude about Swift concurrency patterns.",
-            sourceApp: "Claude"
+            rawText: "This is a sample raw text from a saved article about Swift concurrency patterns.",
+            sourceApp: "Safari"
         ))
     }
     .modelContainer(for: [InsightCard.self, Topic.self, TopicHierarchyNode.self, CardRelation.self, KnowledgeEntity.self, KnowledgeRelation.self], inMemory: true)

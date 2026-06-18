@@ -29,15 +29,15 @@ func seedScreenshotDemoDataIfNeeded(modelContext: ModelContext) {
             confidence: 0.91
         ),
         demoCard(
-            title: "AI reading workflow",
+            title: "Research reading workflow",
             highlight: "Capture first, organize second. The key is removing friction at the moment an idea appears.",
-            summary: "Notes from an AI reading workflow that turns saved paragraphs into searchable cards with topics and entities.",
-            sourceApp: "ChatGPT",
+            summary: "Notes from a reading workflow that turns saved paragraphs into searchable cards with topics and entities.",
+            sourceApp: "Research Chat",
             sourceTitle: "Research workflow conversation",
-            topics: ["AI Research", "Knowledge Capture"],
+            topics: ["Research", "Knowledge Capture"],
             keywords: ["capture", "summary", "tags"],
-            entities: ["ChatGPT", "Knowledge Graph", "OmniSift"],
-            relations: ["AI summaries reduce review time", "Knowledge Graph connects recurring concepts"],
+            entities: ["Knowledge Graph", "OmniSift"],
+            relations: ["Structured summaries reduce review time", "Knowledge Graph connects recurring concepts"],
             confidence: 0.88
         ),
         demoCard(

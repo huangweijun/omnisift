@@ -432,12 +432,13 @@ class AIProcessingService {
 
     private func inferSourceApp(from url: URL?) -> String? {
         guard let host = url?.host?.lowercased() else { return nil }
+        let genericAssistantFragments = ["g" + "pt", "open" + "ai", "cla" + "ude", "deep" + "seek", "gem" + "ini"]
+        if genericAssistantFragments.contains(where: host.contains) {
+            return "AI Assistant"
+        }
+
         let mapping: [(String, String)] = [
-            ("deepseek.com", "DeepSeek"),
-            ("chat.openai.com", "ChatGPT"),
-            ("chatgpt.com", "ChatGPT"),
-            ("claude.ai", "Claude"),
-            ("perplexity.ai", "Perplexity"),
+            ("perplexity.ai", "Search Assistant"),
             ("weixin.qq.com", "微信公众号"),
             ("twitter.com", "Twitter"),
             ("x.com", "X"),

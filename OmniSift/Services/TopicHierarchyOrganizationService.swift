@@ -301,7 +301,7 @@ final class TopicHierarchyOrganizationService {
         switch language {
         case .simplifiedChinese:
             return [
-                DeterministicTopicGroup(name: "技术", keywords: ["swift", "ios", "ai", "代码", "开发", "模型", "工具", "数据库", "云", "技术", "编程", "claude", "gemini"]),
+                DeterministicTopicGroup(name: "技术", keywords: ["swift", "ios", "ai", "代码", "开发", "模型", "工具", "数据库", "云", "技术", "编程"]),
                 DeterministicTopicGroup(name: "工作与商业", keywords: ["项目", "产品", "创业", "商业", "会议", "职业", "公司", "管理"]),
                 DeterministicTopicGroup(name: "学习", keywords: ["书", "课程", "学习", "研究", "笔记", "知识"]),
                 DeterministicTopicGroup(name: "生活", keywords: ["生活", "健康", "习惯", "家庭", "旅行", "日常"]),
@@ -311,7 +311,7 @@ final class TopicHierarchyOrganizationService {
             ]
         case .english:
             return [
-                DeterministicTopicGroup(name: "Technology", keywords: ["swift", "ios", "ai", "code", "api", "database", "cloud", "model", "developer", "software", "claude", "gemini"]),
+                DeterministicTopicGroup(name: "Technology", keywords: ["swift", "ios", "ai", "code", "api", "database", "cloud", "model", "developer", "software"]),
                 DeterministicTopicGroup(name: "Work & Business", keywords: ["project", "product", "startup", "business", "meeting", "career", "company", "management"]),
                 DeterministicTopicGroup(name: "Learning", keywords: ["book", "course", "study", "research", "note", "learning"]),
                 DeterministicTopicGroup(name: "Life", keywords: ["health", "habit", "family", "home", "travel", "daily"]),
